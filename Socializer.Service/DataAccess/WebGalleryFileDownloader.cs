@@ -20,12 +20,12 @@ namespace Infrastructure
 
         public async Task<byte[]> DownloadImageFromFileServer(string appPathBase64, string webGalleryApiUser)
         {
-                HttpClient client = _clientFactory.CreateClient("HttpClientWithSSLUntrusted");
-                client.DefaultRequestHeaders.Add("Gallery-User", webGalleryApiUser);
+            HttpClient client = _clientFactory.CreateClient("HttpClientWithSSLUntrusted");
+            client.DefaultRequestHeaders.Add("Gallery-User", webGalleryApiUser);
 
-                var response = await client.GetAsync($"{FileServerUrl}/files/image?file={appPathBase64}");
+            var response = await client.GetAsync($"{FileServerUrl}/files/image?file={appPathBase64}");
 
-                return await response.Content.ReadAsByteArrayAsync();
+            return await response.Content.ReadAsByteArrayAsync();
         }
     }
 }

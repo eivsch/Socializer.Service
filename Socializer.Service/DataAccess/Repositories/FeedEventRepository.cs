@@ -1,5 +1,4 @@
-﻿using System.Data.SqlClient;
-using Dapper;
+﻿using Dapper;
 using DomainModel.FeedEvents;
 using DomainModel.FeedEvents.Interfaces;
 
@@ -7,6 +6,13 @@ namespace Infrastructure.Repositories
 {
     public class FeedEventRepository : IFeedEventRepository
     {
+        private IDatabaseConnection _db;
+
+        public FeedEventRepository(IDatabaseConnection socializerDbConnection)
+        {
+            _db = socializerDbConnection;
+        }
+
         public async Task AddEventToQueue(FeedEvent newEvent)
         {
             string sql = @"INSERT INTO FeedEventQueue(
@@ -18,7 +24,7 @@ namespace Infrastructure.Repositories
                             @EventType,
                             @EventDataJson)";
 
-            using (var connection = new SqlConnection("Server=.;Database=WebGallery;Trusted_Connection=True;"))
+            using (var connection = _db.GetConnection())
             {
                 var affectedRows = await connection.ExecuteAsync(sql,
                     new

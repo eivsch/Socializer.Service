@@ -3,17 +3,24 @@ using Infrastructure;
 using DomainModel.FeedEvents;
 using DomainModel.Users;
 using Newtonsoft.Json;
-using Infrastructure.Repositories;
+using DomainModel.FeedEvents.Interfaces;
 
 namespace Logic
 {
-    public class UserRegistrationManager
+    public interface IUserRegistrationManager
     {
-        private readonly UserRepository _userRepository;
+        Task<User> RegisterUser();
+    }
 
-        public UserRegistrationManager()
+    public class UserRegistrationManager : IUserRegistrationManager
+    {
+        private readonly IUserRepository _userRepository;
+        private readonly IFeedEventRepository _feedEventRepository;
+
+        public UserRegistrationManager(IUserRepository userRepository, IFeedEventRepository feedEventRepository)
         {
-            _userRepository = new UserRepository();
+            _userRepository = userRepository;
+            _feedEventRepository = feedEventRepository;
         }
 
         public async Task<User> RegisterUser()
@@ -84,7 +91,7 @@ namespace Logic
                 EventDataJson = JsonConvert.SerializeObject(userData)
             };
 
-            await new FeedEventRepository().AddEventToQueue(feedEvent);
+            await _feedEventRepository.AddEventToQueue(feedEvent);
         }
     }
 }

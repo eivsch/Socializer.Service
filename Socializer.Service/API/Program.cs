@@ -1,4 +1,9 @@
+using DomainModel.FeedEvents.Interfaces;
+using DomainModel.Posts;
+using DomainModel.Users;
 using Infrastructure;
+using Infrastructure.Repositories;
+using Logic;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +24,21 @@ builder.Services.AddHttpClient("HttpClientWithSSLUntrusted").ConfigurePrimaryHtt
             }
 });
 
+// Infrastructure
+builder.Services.AddSingleton<IDatabaseConnection, SocializerDbConnection>((db) =>
+{
+    return new SocializerDbConnection(connectionString: builder.Configuration.GetConnectionString("SocializerDb"));
+});
+builder.Services.AddScoped<IFeedEventRepository, FeedEventRepository>();
+builder.Services.AddScoped<IPostRepository, PostRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 builder.Services.AddScoped<IWebGalleryFileDownloader, WebGalleryFileDownloader>();
+
+// Logic
+builder.Services.AddScoped<IPostManager, PostManager>();
+builder.Services.AddScoped<IRandomUserPostManager, RandomUserPostManager>();
+builder.Services.AddScoped<IUserRegistrationManager, UserRegistrationManager>();
 
 var app = builder.Build();
 

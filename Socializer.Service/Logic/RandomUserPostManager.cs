@@ -5,18 +5,35 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using DomainModel.FeedEvents;
+using DomainModel.FeedEvents.Interfaces;
 using DomainModel.Posts;
+using DomainModel.Users;
 using Infrastructure;
-using Infrastructure.Repositories;
 using Newtonsoft.Json;
 
 namespace Logic
 {
-    public class RandomUserPostManager
+    public interface IRandomUserPostManager
     {
+        Task PostRandomTextFromRandomUser();
+    }
+
+    public class RandomUserPostManager : IRandomUserPostManager
+    {
+        private IPostRepository _postRepository;
+        private IUserRepository _userRepository;
+        private IFeedEventRepository _feedEventRepository;
+
+        public RandomUserPostManager(IPostRepository postRepository, IUserRepository userRepository, IFeedEventRepository feedEventRepository)
+        {
+            _postRepository = postRepository;
+            _userRepository = userRepository;
+            _feedEventRepository = feedEventRepository;
+        }
+
         public async Task PostRandomTextFromRandomUser()
         {
-            var user = await new UserRepository().GetRandomUser();
+            var user = await _userRepository.GetRandomUser();
             var picture = await new WebGalleryService().GetRandomPicture("testuser");
             var text = await GenerateRandomText();
 
@@ -35,7 +52,7 @@ namespace Logic
                 PostDataJson = JsonConvert.SerializeObject(postData),
             };
 
-            await new PostRepository().SavePost(post);
+            await _postRepository.SavePost(post);
 
             await RegisterNewPostEvent(post);
         }
@@ -75,7 +92,7 @@ namespace Logic
                 EventDataJson = JsonConvert.SerializeObject(eventData)
             };
 
-            await new FeedEventRepository().AddEventToQueue(feedEvent);
+            await _feedEventRepository.AddEventToQueue(feedEvent);
         }
     }
 }

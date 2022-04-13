@@ -4,34 +4,50 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DomainModel.Posts;
-using Infrastructure.Repositories;
+using DomainModel.Users;
 using Newtonsoft.Json;
 
 namespace Logic
 {
-    public class PostManager
+    public interface IPostManager
     {
+        Task<List<Post>?> GetPosts(string username);
+        Task<Post?> GetPost(string postId);
+        Task<PostPicture> GetPictureForPost(string postId);
+    }
+
+    public class PostManager : IPostManager
+    {
+        private IPostRepository _postRepository;
+        private IUserRepository _userRepository;
+
+        public PostManager(IPostRepository postRepository, IUserRepository userRepository)
+        {
+            _postRepository = postRepository;
+            _userRepository = userRepository;
+        }
+
         public async Task<List<Post>?> GetPosts(string username)
         {
-            var user = await new UserRepository().GetUserByName(username);
+            var user = await _userRepository.GetUserByName(username);
             if (user == null)
                 return null;
 
-            var posts = await new PostRepository().GetPostsWithoutData(user.UserId);
+            var posts = await _postRepository.GetPostsWithoutData(user.UserId);
 
             return posts;
         }
 
         public async Task<Post?>GetPost(string postId)
         {
-            var post = await new PostRepository().GetPost(postId);
+            var post = await _postRepository.GetPost(postId);
 
             return post;
         }
 
         public async Task<PostPicture> GetPictureForPost(string postId)
         {
-            var postDataJson = await new PostRepository().GetPostData(postId);
+            var postDataJson = await _postRepository.GetPostData(postId);
             PostPicture pic = JsonConvert.DeserializeObject<PostPicture>(postDataJson);
 
             return pic;

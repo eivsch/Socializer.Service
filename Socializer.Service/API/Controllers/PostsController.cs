@@ -8,16 +8,20 @@ namespace API.Controllers
     public class PostsController : ControllerBase
     {
         private readonly ILogger<UsersController> _logger;
+        private readonly IRandomUserPostManager _randomUserPostManager;
+        private readonly IPostManager _postManager;
 
-        public PostsController(ILogger<UsersController> logger)
+        public PostsController(ILogger<UsersController> logger, IRandomUserPostManager randomUserPostManager, IPostManager postManager)
         {
             _logger = logger;
+            _randomUserPostManager = randomUserPostManager;
+            _postManager = postManager;
         }
 
         [HttpPost]
         public async Task<IActionResult> AddRandomPost()
         {
-            await new RandomUserPostManager().PostRandomTextFromRandomUser();
+            await _randomUserPostManager.PostRandomTextFromRandomUser();
 
             return Ok();
         }
@@ -26,7 +30,7 @@ namespace API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetPosts(string username)
         {
-            var posts = await new PostManager().GetPosts(username);
+            var posts = await _postManager.GetPosts(username);
 
             if (posts == null)
                 return NotFound();
@@ -40,7 +44,7 @@ namespace API.Controllers
             if (postId.Length < 5)
                 return BadRequest("Minimum the first 5 characters of the Post ID is required");
 
-            var post = await new PostManager().GetPost(postId);
+            var post = await _postManager.GetPost(postId);
             if (post == null)
                 return NoContent();
 
@@ -53,7 +57,7 @@ namespace API.Controllers
             if (postId.Length < 5)
                 return BadRequest("Minimum the first 5 characters of the Post ID is required");
 
-            var pic = await new PostManager().GetPictureForPost(postId);
+            var pic = await _postManager.GetPictureForPost(postId);
 
             return Ok(pic);
         }

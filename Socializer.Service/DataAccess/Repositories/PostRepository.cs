@@ -12,11 +12,18 @@ namespace Infrastructure.Repositories
 {
     public class PostRepository : IPostRepository
     {
+        private IDatabaseConnection _db;
+
+        public PostRepository(IDatabaseConnection socializerDbConnection)
+        {
+            _db = socializerDbConnection;
+        }
+
         public async Task<string> GetPostData(string postId)
         {
             string sql = @"SELECT PostDataJson FROM Post WHERE PostId LIKE @PostId";
 
-            using (var connection = new SqlConnection("Server=.;Database=WebGallery;Trusted_Connection=True;"))
+            using (var connection = _db.GetConnection())
             {
                 var post = await connection.QueryFirstAsync<Post>(sql, new { PostId = postId + "%" });
 
@@ -33,7 +40,7 @@ namespace Infrastructure.Repositories
                         FROM Post
                         WHERE PostUserId_Fk = @UserId";
 
-            using (var connection = new SqlConnection("Server=.;Database=WebGallery;Trusted_Connection=True;"))
+            using (var connection = _db.GetConnection())
             {
                 var posts = await connection.QueryAsync<Post>(sql, new { UserId = userId });
 
@@ -51,7 +58,7 @@ namespace Infrastructure.Repositories
                         FROM Post
                         WHERE PostId LIKE @PostId";
 
-            using (var connection = new SqlConnection("Server=.;Database=WebGallery;Trusted_Connection=True;"))
+            using (var connection = _db.GetConnection())
             {
                 var post = await connection.QueryFirstOrDefaultAsync<Post>(sql, new { PostId = postId + "%" });
 
@@ -72,7 +79,7 @@ namespace Infrastructure.Repositories
                             @PostCreated,
                             @PostDataJson)";
 
-            using (var connection = new SqlConnection("Server=.;Database=WebGallery;Trusted_Connection=True;"))
+            using (var connection = _db.GetConnection())
             {
                 var affectedRows = await connection.ExecuteAsync(sql,
                     new
@@ -84,6 +91,11 @@ namespace Infrastructure.Repositories
                     }
                 );
             }
+        }
+
+        public Task<List<Post>> GetPosts(string userId, int size, string lastReadPostId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

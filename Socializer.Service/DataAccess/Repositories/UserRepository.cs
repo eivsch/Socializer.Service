@@ -11,6 +11,13 @@ namespace Infrastructure.Repositories
 {
     public class UserRepository : IUserRepository
     {
+        private IDatabaseConnection _db;
+
+        public UserRepository(IDatabaseConnection socializerDbConnection)
+        {
+            _db = socializerDbConnection;
+        }
+
         public async Task<User> GetRandomUser()
         {
             string sql = @"SELECT TOP 1 
@@ -20,7 +27,7 @@ namespace Infrastructure.Repositories
                         FROM SocializerUser
                         ORDER BY NEWID()";
 
-            using (var connection = new SqlConnection("Server=.;Database=WebGallery;Trusted_Connection=True;"))
+            using (var connection = _db.GetConnection())
             {
                 var user = await connection.QueryFirstAsync<User>(sql);
 
@@ -37,7 +44,7 @@ namespace Infrastructure.Repositories
                         FROM SocializerUser
                         WHERE Username = @Username";
 
-            using (var connection = new SqlConnection("Server=.;Database=WebGallery;Trusted_Connection=True;"))
+            using (var connection = _db.GetConnection())
             {
                 var user = await connection.QueryFirstOrDefaultAsync<User>(sql, new { Username = username });
 
@@ -56,7 +63,7 @@ namespace Infrastructure.Repositories
                             @Username,
                             @UserCreated)";
 
-            using (var connection = new SqlConnection("Server=.;Database=WebGallery;Trusted_Connection=True;"))
+            using (var connection = _db.GetConnection())
             {
                 var affectedRows = await connection.ExecuteAsync(sql,
                     new
