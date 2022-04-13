@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using DomainModel.FeedEvents;
+﻿using DomainModel.FeedEvents;
 using DomainModel.FeedEvents.Interfaces;
 using DomainModel.Posts;
 using DomainModel.Users;
 using Infrastructure;
+using Infrastructure.ThirdPartyServices;
 using Newtonsoft.Json;
 
 namespace Logic
@@ -24,20 +19,27 @@ namespace Logic
         private IUserRepository _userRepository;
         private IFeedEventRepository _feedEventRepository;
         private IWebGalleryService _webGalleryService;
+        private IRandommerClient _randommerClient;
 
-        public RandomUserPostManager(IPostRepository postRepository, IUserRepository userRepository, IFeedEventRepository feedEventRepository, IWebGalleryService webGalleryService)
+        public RandomUserPostManager(
+            IPostRepository postRepository, 
+            IUserRepository userRepository, 
+            IFeedEventRepository feedEventRepository, 
+            IWebGalleryService webGalleryService,
+            IRandommerClient randommerClient)
         {
             _postRepository = postRepository;
             _userRepository = userRepository;
             _feedEventRepository = feedEventRepository;
             _webGalleryService = webGalleryService;
+            _randommerClient = randommerClient;
         }
 
         public async Task PostRandomTextFromRandomUser()
         {
             var user = await _userRepository.GetRandomUser();
             var picture = await _webGalleryService.GetRandomPicture();
-            var text = await GenerateRandomText();
+            var text = await _randommerClient.GenerateRandomText();
 
             var postData = new
             {
@@ -55,27 +57,7 @@ namespace Logic
             };
 
             await _postRepository.SavePost(post);
-
             await RegisterNewPostEvent(post);
-        }
-
-        private async Task<string> GenerateRandomText()
-        {
-            HttpClient client = new HttpClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, "https://randommer.io/api/Text/LoremIpsum?loremType=normal&type=words&number=4");
-            request.Headers.Add("X-Api-Key", "76c63aed24cc4096a3aa15986526c137");
-            var respone = client.Send(request);
-            if (respone.StatusCode == HttpStatusCode.OK)
-            {
-                string result = await respone.Content.ReadAsStringAsync();
-                if (result != null)
-                {
-                    string text = JsonConvert.DeserializeObject<string>(result);
-                    return text;
-                }
-            }
-
-            throw new Exception("Unable to generate text - None or bad response from randommer.io");
         }
 
         private async Task RegisterNewPostEvent(Post post)

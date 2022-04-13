@@ -3,6 +3,7 @@ using DomainModel.Posts;
 using DomainModel.Users;
 using Infrastructure;
 using Infrastructure.Repositories;
+using Infrastructure.ThirdPartyServices;
 using Logic;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,7 +25,8 @@ builder.Services.AddHttpClient("HttpClientWithSSLUntrusted").ConfigurePrimaryHtt
             }
 });
 
-// Infrastructure
+#region Infrastructure
+// Repositories
 builder.Services.AddSingleton<IDatabaseConnection, SocializerDbConnection>((db) =>
 {
     return new SocializerDbConnection(connectionString: builder.Configuration.GetConnectionString("SocializerDb"));
@@ -32,7 +34,7 @@ builder.Services.AddSingleton<IDatabaseConnection, SocializerDbConnection>((db) 
 builder.Services.AddScoped<IFeedEventRepository, FeedEventRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-
+// WebGallery
 builder.Services.AddScoped<IWebGalleryFileDownloader, WebGalleryFileDownloader>();
 builder.Services.AddScoped<IWebGalleryService, WebGalleryService>((wb) =>
 {
@@ -41,6 +43,15 @@ builder.Services.AddScoped<IWebGalleryService, WebGalleryService>((wb) =>
         webGalleryApiUser: builder.Configuration.GetValue<string>("WebGallery:WebGalleryUser")
     );
 });
+// Third party services
+builder.Services.AddScoped<IRandommerClient, RandommerClient>((rc) =>
+{
+    return new RandommerClient(
+        randommerApiEndpoint: builder.Configuration.GetValue<string>("Randommer:ApiEndpoint"),
+        randommerApiKey: builder.Configuration.GetValue<string>("Randommer:ApiKey")
+    );
+});
+#endregion
 
 // Logic
 builder.Services.AddScoped<IPostManager, PostManager>();
