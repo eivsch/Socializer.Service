@@ -2,8 +2,8 @@
 using DomainModel.FeedEvents.Interfaces;
 using DomainModel.Posts;
 using DomainModel.Users;
-using Infrastructure;
 using Infrastructure.ThirdPartyServices;
+using Infrastructure.WebGallery;
 using Newtonsoft.Json;
 
 namespace Logic

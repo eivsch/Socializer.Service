@@ -1,7 +1,7 @@
 ﻿using DomainModel.Posts;
 using Newtonsoft.Json;
 
-namespace Infrastructure
+namespace Infrastructure.WebGallery
 {
     public interface IWebGalleryService
     {

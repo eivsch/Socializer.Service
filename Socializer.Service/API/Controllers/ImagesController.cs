@@ -1,4 +1,5 @@
 ﻿using Infrastructure;
+using Infrastructure.WebGallery;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -25,7 +26,7 @@ namespace API.Controllers
             var appPathBytes = System.Text.Encoding.UTF8.GetBytes(pic.PictureAppPath);
             string appPathBase64 = Convert.ToBase64String(appPathBytes);
             
-            var fileBytes = await _webGalleryFileDownloader.DownloadImageFromFileServer(appPathBase64, "testuser");
+            var fileBytes = await _webGalleryFileDownloader.DownloadImageFromFileServer(appPathBase64);
 
             return new FileContentResult(fileBytes, "image/jpeg");
         }
@@ -33,7 +34,7 @@ namespace API.Controllers
         [HttpGet("webgallery/{appPathBase64}")]
         public async Task<IActionResult> WebGalleryPictureByAppPath(string appPathBase64)
         {
-            var fileBytes = await _webGalleryFileDownloader.DownloadImageFromFileServer(appPathBase64, "testuser");
+            var fileBytes = await _webGalleryFileDownloader.DownloadImageFromFileServer(appPathBase64);
 
             return new FileContentResult(fileBytes, "image/jpeg");
         }

@@ -1,9 +1,11 @@
+using API.Configuration;
 using DomainModel.FeedEvents.Interfaces;
 using DomainModel.Posts;
 using DomainModel.Users;
 using Infrastructure;
 using Infrastructure.Repositories;
 using Infrastructure.ThirdPartyServices;
+using Infrastructure.WebGallery;
 using Logic;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,12 +37,13 @@ builder.Services.AddScoped<IFeedEventRepository, FeedEventRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 // WebGallery
+builder.Services.AddSingleton<IWebGalleryOptions, WebGalleryOptions>();
 builder.Services.AddScoped<IWebGalleryFileDownloader, WebGalleryFileDownloader>();
 builder.Services.AddScoped<IWebGalleryService, WebGalleryService>((wb) =>
 {
     return new WebGalleryService(
-        webGalleryApiEndpoint: builder.Configuration.GetValue<string>("WebGallery:WebGalleryApiEndpoint"),
-        webGalleryApiUser: builder.Configuration.GetValue<string>("WebGallery:WebGalleryUser")
+        webGalleryApiEndpoint: builder.Configuration.GetValue<string>("WebGallery:ApiEndpoint"),
+        webGalleryApiUser: builder.Configuration.GetValue<string>("WebGallery:User")
     );
 });
 // Third party services
