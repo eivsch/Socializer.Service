@@ -34,6 +34,13 @@ builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddScoped<IWebGalleryFileDownloader, WebGalleryFileDownloader>();
+builder.Services.AddScoped<IWebGalleryService, WebGalleryService>((wb) =>
+{
+    return new WebGalleryService(
+        webGalleryApiEndpoint: builder.Configuration.GetValue<string>("WebGallery:WebGalleryApiEndpoint"),
+        webGalleryApiUser: builder.Configuration.GetValue<string>("WebGallery:WebGalleryUser")
+    );
+});
 
 // Logic
 builder.Services.AddScoped<IPostManager, PostManager>();

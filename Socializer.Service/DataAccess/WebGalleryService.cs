@@ -1,23 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DomainModel.Posts;
+﻿using DomainModel.Posts;
 using Newtonsoft.Json;
 
 namespace Infrastructure
 {
-    public class WebGalleryService
+    public interface IWebGalleryService
     {
-        const string WebGalleryApiEndpoint = "https://webgallery-api.azurewebsites.net";
+        Task<PostPicture> GetRandomPicture();
+    }
 
-        public async Task<PostPicture> GetRandomPicture(string webGalleryApiUser)
+    public class WebGalleryService : IWebGalleryService
+    {
+        private string _webGalleryApiEndpoint;
+        private string _webGalleryUser;
+
+        public WebGalleryService(string webGalleryApiEndpoint, string webGalleryApiUser)
+        {
+            _webGalleryApiEndpoint = webGalleryApiEndpoint;
+            _webGalleryUser = webGalleryApiUser;
+        }
+
+        public async Task<PostPicture> GetRandomPicture()
         {
             HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri(WebGalleryApiEndpoint);
+            client.BaseAddress = new Uri(_webGalleryApiEndpoint);
             client.DefaultRequestHeaders.Add("Accept", "application/json");
-            client.DefaultRequestHeaders.Add("Gallery-User", webGalleryApiUser);
+            client.DefaultRequestHeaders.Add("Gallery-User", _webGalleryUser);
 
             var request = new HttpRequestMessage(HttpMethod.Get, $"pictures/random");
             var response = await client.SendAsync(request);

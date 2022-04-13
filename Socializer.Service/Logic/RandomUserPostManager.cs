@@ -23,18 +23,20 @@ namespace Logic
         private IPostRepository _postRepository;
         private IUserRepository _userRepository;
         private IFeedEventRepository _feedEventRepository;
+        private IWebGalleryService _webGalleryService;
 
-        public RandomUserPostManager(IPostRepository postRepository, IUserRepository userRepository, IFeedEventRepository feedEventRepository)
+        public RandomUserPostManager(IPostRepository postRepository, IUserRepository userRepository, IFeedEventRepository feedEventRepository, IWebGalleryService webGalleryService)
         {
             _postRepository = postRepository;
             _userRepository = userRepository;
             _feedEventRepository = feedEventRepository;
+            _webGalleryService = webGalleryService;
         }
 
         public async Task PostRandomTextFromRandomUser()
         {
             var user = await _userRepository.GetRandomUser();
-            var picture = await new WebGalleryService().GetRandomPicture("testuser");
+            var picture = await _webGalleryService.GetRandomPicture();
             var text = await GenerateRandomText();
 
             var postData = new
