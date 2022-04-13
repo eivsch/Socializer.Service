@@ -4,6 +4,7 @@ using DomainModel.FeedEvents;
 using DomainModel.Users;
 using Newtonsoft.Json;
 using DomainModel.FeedEvents.Interfaces;
+using Infrastructure.WebGallery;
 
 namespace Logic
 {
@@ -16,11 +17,13 @@ namespace Logic
     {
         private readonly IUserRepository _userRepository;
         private readonly IFeedEventRepository _feedEventRepository;
+        private readonly IWebGalleryFileDownloader _webGalleryFileDownloader;
 
-        public UserRegistrationManager(IUserRepository userRepository, IFeedEventRepository feedEventRepository)
+        public UserRegistrationManager(IUserRepository userRepository, IFeedEventRepository feedEventRepository, IWebGalleryFileDownloader webgalleryFileDownloader)
         {
             _userRepository = userRepository;
             _feedEventRepository = feedEventRepository;
+            _webGalleryFileDownloader = webgalleryFileDownloader;
         }
 
         public async Task<User> RegisterUser()
@@ -43,11 +46,14 @@ namespace Logic
                 Username = username,
             };
 
-            string profilePicPath = new ProfilePictureService().DownloadRandomProfilePicture(user.Username);
-            user.ProfilePicturePath = profilePicPath;
+            var pfpService = new ProfilePictureService();
+            Stream profilePicStream = await pfpService.DownloadRandomProfilePicture2(user.Username);
+            string filename = user.Username + ".jpg";
+            string albumname = "socializer_profilepics";
+            await _webGalleryFileDownloader.UploadFileToFileServer(albumname, filename, profilePicStream);
+            user.ProfilePicturePath = Path.Combine(albumname, filename);
 
             await _userRepository.Save(user);
-
             await RegisterNewUserEvent(user);
 
             return user;

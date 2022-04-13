@@ -39,13 +39,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 // WebGallery
 builder.Services.AddSingleton<IWebGalleryOptions, WebGalleryOptions>();
 builder.Services.AddScoped<IWebGalleryFileDownloader, WebGalleryFileDownloader>();
-builder.Services.AddScoped<IWebGalleryService, WebGalleryService>((wb) =>
-{
-    return new WebGalleryService(
-        webGalleryApiEndpoint: builder.Configuration.GetValue<string>("WebGallery:ApiEndpoint"),
-        webGalleryApiUser: builder.Configuration.GetValue<string>("WebGallery:User")
-    );
-});
+builder.Services.AddScoped<IWebGalleryService, WebGalleryService>();
 // Third party services
 builder.Services.AddScoped<IRandommerClient, RandommerClient>((rc) =>
 {

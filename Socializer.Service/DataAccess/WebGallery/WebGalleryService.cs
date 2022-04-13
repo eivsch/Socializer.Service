@@ -14,10 +14,10 @@ namespace Infrastructure.WebGallery
         private string _webGalleryApiEndpoint;
         private string _webGalleryUser;
 
-        public WebGalleryService(string webGalleryApiEndpoint, string webGalleryApiUser)
+        public WebGalleryService(IWebGalleryOptions webGalleryOptions)
         {
-            _webGalleryApiEndpoint = webGalleryApiEndpoint;
-            _webGalleryUser = webGalleryApiUser;
+            _webGalleryApiEndpoint = webGalleryOptions.ApiEndpoint;
+            _webGalleryUser = webGalleryOptions.User;
         }
 
         public async Task<PostPicture> GetPictureById(string id)

@@ -21,6 +21,21 @@ namespace Infrastructure
             return savePath;
         }
 
+        public async Task<Stream> DownloadRandomProfilePicture2(string username)
+        {
+            HttpClient client = new HttpClient();
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://thispersondoesnotexist.com/image");
+            var respone = await client.SendAsync(request);
+            if (respone.StatusCode == HttpStatusCode.OK)
+            {
+                var resultStream = await respone.Content.ReadAsStreamAsync();
+
+                return resultStream;
+            }
+
+            throw new Exception("Unable to generate profile picture - None or bad response from thispersondonotexist.com");
+        }
+
         public byte[] GetProfilePictureFromDisk(string username)
         {
             string path = Path.Combine(RootPath, $"{username}.jpg");
