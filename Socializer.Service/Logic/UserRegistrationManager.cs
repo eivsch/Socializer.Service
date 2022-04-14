@@ -1,10 +1,8 @@
-﻿using System.Net;
-using Infrastructure;
-using DomainModel.FeedEvents;
+﻿using DomainModel.FeedEvents;
 using DomainModel.Users;
 using Newtonsoft.Json;
 using DomainModel.FeedEvents.Interfaces;
-using Infrastructure.WebGallery;
+using DomainModel.Generators;
 
 namespace Logic
 {
@@ -17,30 +15,33 @@ namespace Logic
     {
         private readonly IUserRepository _userRepository;
         private readonly IFeedEventRepository _feedEventRepository;
-        private readonly IWebGalleryFileServerClient _webGalleryFileDownloader;
         private readonly IProfilePictureManager _profilePictureManager;
+        private readonly IProfilePicGenerator _profilePicGenerator;
+        private readonly IUserNameGenerator _userNameGenerator;
 
         public UserRegistrationManager(
             IUserRepository userRepository, 
             IFeedEventRepository feedEventRepository, 
-            IWebGalleryFileServerClient webgalleryFileDownloader,
-            IProfilePictureManager profilePictureManager)
+            IProfilePictureManager profilePictureManager,
+            IProfilePicGenerator profilePicGenerator,
+            IUserNameGenerator userNameGenerator)
         {
             _userRepository = userRepository;
             _feedEventRepository = feedEventRepository;
-            _webGalleryFileDownloader = webgalleryFileDownloader;
             _profilePictureManager = profilePictureManager;
+            _profilePicGenerator = profilePicGenerator;
+            _userNameGenerator = userNameGenerator;
         }
 
         public async Task<User> RegisterUser()
         {
-            string username = await GenerateUserName();
+            string username = await _userNameGenerator.GenerateUserName();
             // Make sure the username is unique
             while (true)
             {
                 var existingUser = await _userRepository.GetUserByName(username);
                 if (existingUser != null)
-                    username = await GenerateUserName();
+                    username = await _userNameGenerator.GenerateUserName();
                 else
                     break;
             }
@@ -52,34 +53,14 @@ namespace Logic
                 Username = username,
             };
 
-            string appPath = await _profilePictureManager.GenerateProfilePictureForUser(username);
+            Stream profilePicture = await _profilePicGenerator.GeneratePicture();
+            string appPath = await _profilePictureManager.SaveProfilePictureForUser(username, profilePicture);
             user.ProfilePicturePath = appPath;
 
             await _userRepository.Save(user);
             await RegisterNewUserEvent(user);
 
             return user;
-        }
-
-        private async Task<string> GenerateUserName()
-        {
-            HttpClient client = new HttpClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, "https://randommer.io/api/Name?nametype=fullname&quantity=1");
-            request.Headers.Add("X-Api-Key", "76c63aed24cc4096a3aa15986526c137");
-            var respone = client.Send(request);
-            if (respone.StatusCode == HttpStatusCode.OK)
-            {
-                string result = await respone.Content.ReadAsStringAsync();
-                if (result != null)
-                {
-                    var names = JsonConvert.DeserializeObject<IEnumerable<string>>(result);
-                    string username = names.First().Replace(" ", ".").ToLower();
-
-                    return username;
-                }
-            }
-
-            throw new Exception("Unable to generate username - None or bad response from randommer.io");
         }
 
         private async Task RegisterNewUserEvent(User newUser)

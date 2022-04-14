@@ -1,40 +1,36 @@
 ﻿using System.Text;
-using Infrastructure.ThirdPartyServices;
 using Infrastructure.WebGallery;
 
 namespace Logic
 {
     public interface IProfilePictureManager
     {
-        Task<string> GenerateProfilePictureForUser(string username);
-        Task<byte[]> GetProfilePictureBytes(string username);
+        Task<string> SaveProfilePictureForUser(string username, Stream profilePicture);
+        Task<byte[]> GetProfilePictureForUser(string username);
     }
 
     public class ProfilePictureManager : IProfilePictureManager
     {
         private const string RootPath = "socializer_profilepics";
 
-        private IThisPersonDoesNotExistClient _thisPersonDoesNotExistClient;
         private IWebGalleryFileServerClient _webGalleryFileDownloader;
 
-        public ProfilePictureManager(IThisPersonDoesNotExistClient thisPersonDoesNotExistClient, IWebGalleryFileServerClient webGalleryFileServerClient)
+        public ProfilePictureManager(IWebGalleryFileServerClient webGalleryFileServerClient)
         {
-            _thisPersonDoesNotExistClient = thisPersonDoesNotExistClient;
             _webGalleryFileDownloader = webGalleryFileServerClient;
         }
 
         string ResolveAppPath(string username) => Path.Combine(RootPath, username + ".jpg");
 
-        public async Task<string> GenerateProfilePictureForUser(string username)
+        public async Task<string> SaveProfilePictureForUser(string username, Stream profilePicture)
         {
-            Stream profilePicStream = await _thisPersonDoesNotExistClient.DownloadRandomGeneratedPicture();
             string filename = username + ".jpg";
-            await _webGalleryFileDownloader.UploadFileToFileServer(RootPath, filename, profilePicStream);
+            await _webGalleryFileDownloader.UploadFileToFileServer(RootPath, filename, profilePicture);
             
             return ResolveAppPath(username);
         }
 
-        public async Task<byte[]> GetProfilePictureBytes(string username)
+        public async Task<byte[]> GetProfilePictureForUser(string username)
         {
             string path = ResolveAppPath(username);
             var appPathBytes = Encoding.UTF8.GetBytes(path);

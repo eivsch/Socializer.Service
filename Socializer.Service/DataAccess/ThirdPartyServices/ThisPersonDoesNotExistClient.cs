@@ -1,15 +1,11 @@
 ﻿using System.Net;
+using DomainModel.Generators;
 
 namespace Infrastructure.ThirdPartyServices
 {
-    public interface IThisPersonDoesNotExistClient
+    public class ThisPersonDoesNotExistClient : IProfilePicGenerator
     {
-        Task<Stream> DownloadRandomGeneratedPicture();
-    }
-
-    public class ThisPersonDoesNotExistClient : IThisPersonDoesNotExistClient
-    {
-        public async Task<Stream> DownloadRandomGeneratedPicture()
+        public async Task<Stream> GeneratePicture()
         {
             HttpClient client = new HttpClient();
             var request = new HttpRequestMessage(HttpMethod.Get, $"https://thispersondoesnotexist.com/image");

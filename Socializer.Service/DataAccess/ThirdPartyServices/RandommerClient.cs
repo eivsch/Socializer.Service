@@ -1,14 +1,10 @@
 ﻿using System.Net;
+using DomainModel.Generators;
 using Newtonsoft.Json;
 
 namespace Infrastructure.ThirdPartyServices
 {
-    public interface IRandommerClient
-    {
-        Task<string> GenerateRandomText();
-    }
-
-    public class RandommerClient : IRandommerClient
+    public class RandommerClient : IRandomTextGenerator, IUserNameGenerator
     {
         string _randommerApiEndpoint;
         string _randommerApiKey;
@@ -36,6 +32,27 @@ namespace Infrastructure.ThirdPartyServices
             }
 
             throw new Exception("Unable to generate text - None or bad response from randommer.io");
+        }
+
+        public async Task<string> GenerateUserName()
+        {
+            HttpClient client = new HttpClient();
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{_randommerApiEndpoint}/api/Name?nametype=fullname&quantity=1");
+            request.Headers.Add("X-Api-Key", _randommerApiKey);
+            var respone = client.Send(request);
+            if (respone.StatusCode == HttpStatusCode.OK)
+            {
+                string result = await respone.Content.ReadAsStringAsync();
+                if (result != null)
+                {
+                    var names = JsonConvert.DeserializeObject<IEnumerable<string>>(result);
+                    string username = names.First().Replace(" ", ".").ToLower();
+
+                    return username;
+                }
+            }
+
+            throw new Exception("Unable to generate username - None or bad response from randommer.io");
         }
     }
 }

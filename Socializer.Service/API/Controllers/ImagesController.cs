@@ -48,7 +48,7 @@ namespace API.Controllers
         [HttpGet("profiles/{username}")]
         public async Task<IActionResult> ProfilePicture(string username)
         {
-            var fileBytes = await _profilePictureManager.GetProfilePictureBytes(username);
+            var fileBytes = await _profilePictureManager.GetProfilePictureForUser(username);
 
             return new FileContentResult(fileBytes, "image/jpeg");
         }

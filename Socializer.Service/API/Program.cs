@@ -1,5 +1,6 @@
 using API.Configuration;
 using DomainModel.FeedEvents.Interfaces;
+using DomainModel.Generators;
 using DomainModel.Posts;
 using DomainModel.Users;
 using Infrastructure;
@@ -41,14 +42,9 @@ builder.Services.AddSingleton<IWebGalleryOptions, WebGalleryOptions>();
 builder.Services.AddScoped<IWebGalleryFileServerClient, WebGalleryFileServerClient>();
 builder.Services.AddScoped<IWebGalleryService, WebGalleryService>();
 // Third party services
-builder.Services.AddScoped<IRandommerClient, RandommerClient>((rc) =>
-{
-    return new RandommerClient(
-        randommerApiEndpoint: builder.Configuration.GetValue<string>("Randommer:ApiEndpoint"),
-        randommerApiKey: builder.Configuration.GetValue<string>("Randommer:ApiKey")
-    );
-});
-builder.Services.AddScoped<IThisPersonDoesNotExistClient, ThisPersonDoesNotExistClient>();
+builder.Services.AddScoped<IRandomTextGenerator, RandommerClient>((rc) => CreateRandommerClient());
+builder.Services.AddScoped<IUserNameGenerator, RandommerClient>((rc) => CreateRandommerClient());
+builder.Services.AddScoped<IProfilePicGenerator, ThisPersonDoesNotExistClient>();
 #endregion
 
 // Logic
@@ -79,3 +75,12 @@ app.UseCors(policy =>
     .AllowAnyHeader());
 
 app.Run();
+
+
+RandommerClient CreateRandommerClient()
+{
+    return new RandommerClient(
+        randommerApiEndpoint: builder.Configuration.GetValue<string>("Randommer:ApiEndpoint"),
+        randommerApiKey: builder.Configuration.GetValue<string>("Randommer:ApiKey")
+    );
+}
