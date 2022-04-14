@@ -48,12 +48,14 @@ builder.Services.AddScoped<IRandommerClient, RandommerClient>((rc) =>
         randommerApiKey: builder.Configuration.GetValue<string>("Randommer:ApiKey")
     );
 });
+builder.Services.AddScoped<IThisPersonDoesNotExistClient, ThisPersonDoesNotExistClient>();
 #endregion
 
 // Logic
 builder.Services.AddScoped<IPostManager, PostManager>();
 builder.Services.AddScoped<IRandomUserPostManager, RandomUserPostManager>();
 builder.Services.AddScoped<IUserRegistrationManager, UserRegistrationManager>();
+builder.Services.AddScoped<IProfilePictureManager, ProfilePictureManager>();
 
 var app = builder.Build();
 
