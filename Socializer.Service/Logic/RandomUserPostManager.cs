@@ -3,7 +3,6 @@ using DomainModel.FeedEvents.Interfaces;
 using DomainModel.Generators;
 using DomainModel.Posts;
 using DomainModel.Users;
-using Infrastructure.WebGallery;
 using Newtonsoft.Json;
 
 namespace Logic
@@ -18,27 +17,27 @@ namespace Logic
         private IPostRepository _postRepository;
         private IUserRepository _userRepository;
         private IFeedEventRepository _feedEventRepository;
-        private IWebGalleryService _webGalleryService;
+        private IPostPictureGenerator _postPictureGenerator;
         private IRandomTextGenerator _randomTextGenerator;
 
         public RandomUserPostManager(
             IPostRepository postRepository, 
             IUserRepository userRepository, 
-            IFeedEventRepository feedEventRepository, 
-            IWebGalleryService webGalleryService,
+            IFeedEventRepository feedEventRepository,
+            IPostPictureGenerator postPictureGenerator,
             IRandomTextGenerator randomTextGenerator)
         {
             _postRepository = postRepository;
             _userRepository = userRepository;
             _feedEventRepository = feedEventRepository;
-            _webGalleryService = webGalleryService;
+            _postPictureGenerator = postPictureGenerator;
             _randomTextGenerator = randomTextGenerator;
         }
 
         public async Task PostRandomTextFromRandomUser()
         {
             var user = await _userRepository.GetRandomUser();
-            var picture = await _webGalleryService.GetRandomPicture();
+            var picture = await _postPictureGenerator.GeneratePostPicture();
             var text = await _randomTextGenerator.GenerateRandomText();
 
             var postData = new

@@ -25,7 +25,7 @@ namespace Logic
         public async Task<string> SaveProfilePictureForUser(string username, Stream profilePicture)
         {
             string filename = username + ".jpg";
-            await _webGalleryFileDownloader.UploadFileToFileServer(RootPath, filename, profilePicture);
+            await _webGalleryFileDownloader.UploadImageToFileServer(RootPath, filename, profilePicture);
             
             return ResolveAppPath(username);
         }

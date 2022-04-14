@@ -40,8 +40,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 // WebGallery
 builder.Services.AddSingleton<IWebGalleryOptions, WebGalleryOptions>();
 builder.Services.AddScoped<IWebGalleryFileServerClient, WebGalleryFileServerClient>();
-builder.Services.AddScoped<IWebGalleryService, WebGalleryService>();
-// Third party services
+// Generators
+builder.Services.AddScoped<IPostPictureGenerator, WebGalleryApiClient>();
 builder.Services.AddScoped<IRandomTextGenerator, RandommerClient>((rc) => CreateRandommerClient());
 builder.Services.AddScoped<IUserNameGenerator, RandommerClient>((rc) => CreateRandommerClient());
 builder.Services.AddScoped<IProfilePicGenerator, ThisPersonDoesNotExistClient>();

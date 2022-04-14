@@ -3,7 +3,7 @@
     public interface IWebGalleryFileServerClient
     {
         Task<byte[]> DownloadImageFromFileServer(string appPathBase64);
-        Task UploadFileToFileServer(string albumname, string filename, Stream file);
+        Task UploadImageToFileServer(string albumname, string filename, Stream imageFile);
     }
 
     public class WebGalleryFileServerClient : IWebGalleryFileServerClient
@@ -28,7 +28,7 @@
             return await response.Content.ReadAsByteArrayAsync();
         }
 
-        public async Task UploadFileToFileServer(string albumname, string filename, Stream file)
+        public async Task UploadImageToFileServer(string albumname, string filename, Stream file)
         {
             using (var content = new MultipartFormDataContent())
             {
