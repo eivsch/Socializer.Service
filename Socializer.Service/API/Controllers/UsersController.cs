@@ -23,11 +23,5 @@ namespace API.Controllers
 
             return Ok(newUser);
         }
-
-        [HttpGet("{userId}/feed")]
-        public async Task<IActionResult> GetFeed([FromRoute] string userId, [FromQuery] int size, [FromQuery] string lastReadPostId)
-        {
-            return null;
-        }
     }
 }

@@ -93,9 +93,28 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public Task<List<Post>> GetPosts(string userId, int size, string lastReadPostId)
+        public async Task<List<Post>> GetAllPosts(int size)
         {
-            throw new NotImplementedException();
+            if (size > 1000)
+                size = 1000;
+
+            string sql = @"SELECT TOP (@Size)
+                            CONVERT(NVARCHAR(255), p.PostId) AS PostId,
+                            CONVERT(NVARCHAR(255), p.PostUserId_Fk) AS PostUserId,
+                            p.PostCreated,
+                            p.PostDataJson,
+	                        u.Username AS PostUsername,
+                            JSON_VALUE(PostDataJson, '$.Text') AS PostHeader
+                        FROM Post p
+                        JOIN SocializerUser u ON u.UserId = p.PostUserId_Fk
+                        ORDER BY p.PostCreated DESC";
+
+            using (var connection = _db.GetConnection())
+            {
+                var posts = await connection.QueryAsync<Post>(sql, new { Size = size });
+
+                return posts.ToList();
+            }
         }
     }
 }

@@ -11,6 +11,7 @@ namespace Logic
 {
     public interface IPostManager
     {
+        Task<List<Post>?> GetAll(int size);
         Task<List<Post>?> GetPosts(string username);
         Task<Post?> GetPost(string postId);
         Task<PostPicture> GetPictureForPost(string postId);
@@ -51,6 +52,23 @@ namespace Logic
             PostPicture pic = JsonConvert.DeserializeObject<PostPicture>(postDataJson);
 
             return pic;
+        }
+
+        public async Task<List<Post>?> GetAll(int size)
+        {
+            if (size > 24 )
+                size = 24;
+
+            var posts = await _postRepository.GetAllPosts(size);
+            foreach (var post in posts)
+            {
+                PostPicture pic = JsonConvert.DeserializeObject<PostPicture>(post.PostDataJson);
+                post.PostPicture = pic;
+                post.PostDataJson = null; // don't return the raw data
+            }
+
+            return posts;
+            //return posts.OrderByDescending(p => p.PostCreated).ToList();
         }
     }
 }
