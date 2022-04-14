@@ -26,18 +26,6 @@ namespace API.Controllers
             return Ok();
         }
 
-        // TODO: Move to users controller? users/dfsfs.abc/posts
-        [HttpGet]
-        public async Task<IActionResult> GetPosts(string username)
-        {
-            var posts = await _postManager.GetPosts(username);
-
-            if (posts == null)
-                return NotFound();
-
-            return Ok(posts);
-        }
-
         [HttpGet("{postId}")]
         public async Task<IActionResult> GetPost(string postId)
         {

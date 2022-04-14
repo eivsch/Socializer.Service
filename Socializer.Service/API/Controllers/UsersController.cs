@@ -9,11 +9,13 @@ namespace API.Controllers
     {
         private readonly ILogger<UsersController> _logger;
         private readonly IUserRegistrationManager _userRegistrationManager;
+        private readonly IPostManager _postManager;
 
-        public UsersController(ILogger<UsersController> logger, IUserRegistrationManager userRegistrationManager)
+        public UsersController(ILogger<UsersController> logger, IUserRegistrationManager userRegistrationManager, IPostManager postManager)
         {
             _logger = logger;
             _userRegistrationManager = userRegistrationManager;
+            _postManager = postManager;
         }
 
         [HttpPost]
@@ -22,6 +24,17 @@ namespace API.Controllers
             var newUser = await _userRegistrationManager.RegisterUser();
 
             return Ok(newUser);
+        }
+
+        [HttpGet("{username}/posts")]
+        public async Task<IActionResult> GetPosts(string username)
+        {
+            var posts = await _postManager.GetPosts(username);
+
+            if (posts == null)
+                return NotFound();
+
+            return Ok(posts);
         }
     }
 }

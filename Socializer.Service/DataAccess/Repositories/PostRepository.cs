@@ -31,23 +31,6 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public async Task<List<Post>> GetPostsWithoutData(string userId)
-        {
-            string sql = @"SELECT 
-                            CONVERT(NVARCHAR(255), PostId) AS PostId,
-                            CONVERT(NVARCHAR(255), PostUserId_Fk) AS PostUserId,
-                            PostCreated
-                        FROM Post
-                        WHERE PostUserId_Fk = @UserId";
-
-            using (var connection = _db.GetConnection())
-            {
-                var posts = await connection.QueryAsync<Post>(sql, new { UserId = userId });
-
-                return posts.ToList();
-            }
-        }
-
         public async Task<Post?> GetPost(string postId)
         {
             string sql = @"SELECT 
@@ -90,6 +73,28 @@ namespace Infrastructure.Repositories
                         PostDataJson = post.PostDataJson,
                     }
                 );
+            }
+        }
+
+        public async Task<List<Post>> GetPostsForUser(string userId)
+        {
+            string sql = @"SELECT 
+                            CONVERT(NVARCHAR(255), p.PostId) AS PostId,
+                            CONVERT(NVARCHAR(255), p.PostUserId_Fk) AS PostUserId,
+                            p.PostCreated,
+                            p.PostDataJson,
+	                        u.Username AS PostUsername,
+                            JSON_VALUE(PostDataJson, '$.Text') AS PostHeader
+                        FROM Post p
+                        JOIN SocializerUser u ON u.UserId = p.PostUserId_Fk
+                        WHERE p.PostUserId_Fk = @UserId
+                        ORDER BY p.PostCreated DESC";
+
+            using (var connection = _db.GetConnection())
+            {
+                var posts = await connection.QueryAsync<Post>(sql, new { UserId = userId });
+
+                return posts.ToList();
             }
         }
 

@@ -28,17 +28,6 @@ namespace Logic
             _userRepository = userRepository;
         }
 
-        public async Task<List<Post>?> GetPosts(string username)
-        {
-            var user = await _userRepository.GetUserByName(username);
-            if (user == null)
-                return null;
-
-            var posts = await _postRepository.GetPostsWithoutData(user.UserId);
-
-            return posts;
-        }
-
         public async Task<Post?>GetPost(string postId)
         {
             var post = await _postRepository.GetPost(postId);
@@ -52,6 +41,23 @@ namespace Logic
             PostPicture pic = JsonConvert.DeserializeObject<PostPicture>(postDataJson);
 
             return pic;
+        }
+
+        public async Task<List<Post>?> GetPosts(string username)
+        {
+            var user = await _userRepository.GetUserByName(username);
+            if (user == null)
+                return null;
+
+            var posts = await _postRepository.GetPostsForUser(user.UserId);
+            foreach (var post in posts)
+            {
+                PostPicture pic = JsonConvert.DeserializeObject<PostPicture>(post.PostDataJson);
+                post.PostPicture = pic;
+                post.PostDataJson = null; // don't return the raw data
+            }
+
+            return posts;
         }
 
         public async Task<List<Post>?> GetAll(int size)
