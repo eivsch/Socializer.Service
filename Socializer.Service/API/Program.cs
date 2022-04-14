@@ -38,7 +38,7 @@ builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 // WebGallery
 builder.Services.AddSingleton<IWebGalleryOptions, WebGalleryOptions>();
-builder.Services.AddScoped<IWebGalleryFileDownloader, WebGalleryFileDownloader>();
+builder.Services.AddScoped<IWebGalleryFileServerClient, WebGalleryFileServerClient>();
 builder.Services.AddScoped<IWebGalleryService, WebGalleryService>();
 // Third party services
 builder.Services.AddScoped<IRandommerClient, RandommerClient>((rc) =>

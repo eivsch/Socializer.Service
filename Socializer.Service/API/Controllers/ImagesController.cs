@@ -1,5 +1,5 @@
-﻿using Infrastructure;
-using Infrastructure.WebGallery;
+﻿using Infrastructure.WebGallery;
+using Logic;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -9,14 +9,20 @@ namespace API.Controllers
     public class ImagesController : ControllerBase
     {
         private readonly ILogger<UsersController> _logger;
-        private readonly IWebGalleryFileDownloader _webGalleryFileDownloader;
+        private readonly IWebGalleryFileServerClient _webGalleryFileServerClient;
         private readonly IWebGalleryService _webGalleryService;
+        private readonly IProfilePictureManager _profilePictureManager;
 
-        public ImagesController(ILogger<UsersController> logger, IWebGalleryFileDownloader webGalleryFileDownloader, IWebGalleryService webGalleryService)
+        public ImagesController(
+            ILogger<UsersController> logger, 
+            IWebGalleryFileServerClient webGalleryFileDownloader, 
+            IWebGalleryService webGalleryService,
+            IProfilePictureManager profilePictureManager)
         {
             _logger = logger;
-            _webGalleryFileDownloader = webGalleryFileDownloader;
+            _webGalleryFileServerClient = webGalleryFileDownloader;
             _webGalleryService = webGalleryService;
+            _profilePictureManager = profilePictureManager;
         }
 
         [HttpGet("{id}")]
@@ -26,7 +32,7 @@ namespace API.Controllers
             var appPathBytes = System.Text.Encoding.UTF8.GetBytes(pic.PictureAppPath);
             string appPathBase64 = Convert.ToBase64String(appPathBytes);
             
-            var fileBytes = await _webGalleryFileDownloader.DownloadImageFromFileServer(appPathBase64);
+            var fileBytes = await _webGalleryFileServerClient.DownloadImageFromFileServer(appPathBase64);
 
             return new FileContentResult(fileBytes, "image/jpeg");
         }
@@ -34,15 +40,15 @@ namespace API.Controllers
         [HttpGet("webgallery/{appPathBase64}")]
         public async Task<IActionResult> WebGalleryPictureByAppPath(string appPathBase64)
         {
-            var fileBytes = await _webGalleryFileDownloader.DownloadImageFromFileServer(appPathBase64);
+            var fileBytes = await _webGalleryFileServerClient.DownloadImageFromFileServer(appPathBase64);
 
             return new FileContentResult(fileBytes, "image/jpeg");
         }
 
         [HttpGet("profiles/{username}")]
-        public IActionResult ProfilePicture(string username)
+        public async Task<IActionResult> ProfilePicture(string username)
         {
-            var fileBytes = new ProfilePictureService().GetProfilePictureFromDisk(username);
+            var fileBytes = await _profilePictureManager.GetProfilePictureBytes(username);
 
             return new FileContentResult(fileBytes, "image/jpeg");
         }

@@ -1,18 +1,18 @@
 ﻿namespace Infrastructure.WebGallery
 {
-    public interface IWebGalleryFileDownloader
+    public interface IWebGalleryFileServerClient
     {
         Task<byte[]> DownloadImageFromFileServer(string appPathBase64);
         Task UploadFileToFileServer(string albumname, string filename, Stream file);
     }
 
-    public class WebGalleryFileDownloader : IWebGalleryFileDownloader
+    public class WebGalleryFileServerClient : IWebGalleryFileServerClient
     {
         private string _fileServerUrl;
         private string _webGalleryApiUser;
         private HttpClient _client;
 
-        public WebGalleryFileDownloader(IWebGalleryOptions webGalleryOptions, IHttpClientFactory clientFactory)
+        public WebGalleryFileServerClient(IWebGalleryOptions webGalleryOptions, IHttpClientFactory clientFactory)
         {
             _fileServerUrl = webGalleryOptions.FileServerEndpoint;
             _webGalleryApiUser = webGalleryOptions.User;
