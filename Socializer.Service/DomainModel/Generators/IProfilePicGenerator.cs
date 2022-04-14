@@ -1,7 +1,9 @@
-﻿namespace DomainModel.Generators
+﻿using DomainModel.Users;
+
+namespace DomainModel.Generators
 {
     public interface IProfilePicGenerator
     {
-        Task<Stream> GeneratePicture();
+        Task<UserProfilePicture> GeneratePicture(User user);
     }
 }

@@ -23,13 +23,13 @@ namespace Infrastructure.WebGallery
             if (response.IsSuccessStatusCode)
             {
                 string result = await response.Content.ReadAsStringAsync();
-                var postPicture = JsonConvert.DeserializeObject<PictureDTO>(result);
+                var webGalleryPicture = JsonConvert.DeserializeObject<PictureDTO>(result);
 
                 return new PostPicture
                 {
-                    PictureId = postPicture.Id,
-                    PictureAppPath = postPicture.AppPath,
-                    Tags = postPicture.Tags,
+                    PictureId = webGalleryPicture.Id,
+                    PictureUri = webGalleryPicture.AppPath,
+                    Tags = webGalleryPicture.Tags,
                 };
             }
             else

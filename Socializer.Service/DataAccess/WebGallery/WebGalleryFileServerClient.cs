@@ -1,13 +1,13 @@
-﻿namespace Infrastructure.WebGallery
-{
-    public interface IWebGalleryFileServerClient
-    {
-        Task<byte[]> DownloadImageFromFileServer(string appPathBase64);
-        Task UploadImageToFileServer(string albumname, string filename, Stream imageFile);
-    }
+﻿using System.Text;
+using DomainModel.Posts;
+using DomainModel.Users;
 
-    public class WebGalleryFileServerClient : IWebGalleryFileServerClient
+namespace Infrastructure.WebGallery
+{
+    public class WebGalleryFileServerClient : IFileServerClient
     {
+        private const string ProfilePicturesSubPath = "socializer_profilepics";
+
         private string _fileServerUrl;
         private string _webGalleryApiUser;
         private HttpClient _client;
@@ -21,14 +21,45 @@
             _client.DefaultRequestHeaders.Add("Gallery-User", _webGalleryApiUser);
         }
 
-        public async Task<byte[]> DownloadImageFromFileServer(string appPathBase64)
+        string ResolveProfilePictureAppPath(User user) => Path.Combine(ProfilePicturesSubPath, user.Username + ".jpg");
+
+        public async Task<byte[]> DownloadUserProfilePicture(User user)
+        {
+            string appPath = ResolveProfilePictureAppPath(user);
+            var appPathBytes = Encoding.UTF8.GetBytes(appPath);
+            string appPathBase64 = Convert.ToBase64String(appPathBytes);
+
+            return await DownloadImageFromFileServer(appPathBase64);
+        }
+
+        public async Task<UserProfilePicture> UploadUserProfileImage(User user, Stream imageFile)
+        {
+            await UploadImageToFileServer(ProfilePicturesSubPath, user.Username + ".jpg", imageFile);
+
+            return new UserProfilePicture
+            {
+                PictureUri = ResolveProfilePictureAppPath(user)
+            };
+        }
+
+        public Task<PostPicture> UploadPostImage(Post post, Stream imageFile)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<byte[]> DownloadImage(string uri)
+        {
+            return await DownloadImageFromFileServer(uri);
+        }
+
+        private async Task<byte[]> DownloadImageFromFileServer(string appPathBase64)
         {
             var response = await _client.GetAsync($"{_fileServerUrl}/files/image?file={appPathBase64}");
 
             return await response.Content.ReadAsByteArrayAsync();
         }
 
-        public async Task UploadImageToFileServer(string albumname, string filename, Stream file)
+        private async Task UploadImageToFileServer(string albumname, string filename, Stream file)
         {
             using (var content = new MultipartFormDataContent())
             {

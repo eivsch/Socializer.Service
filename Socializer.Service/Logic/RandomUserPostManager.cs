@@ -45,7 +45,7 @@ namespace Logic
                 Username = user.Username,
                 Text = text,
                 PictureId = picture.PictureId,
-                PictureAppPath = picture.PictureAppPath
+                PictureAppPath = picture.PictureUri
             };
             var post = new Post
             {

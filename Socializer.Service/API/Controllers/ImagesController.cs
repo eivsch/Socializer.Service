@@ -1,5 +1,4 @@
-﻿using Infrastructure.WebGallery;
-using Logic;
+﻿using Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -9,17 +8,14 @@ namespace API.Controllers
     public class ImagesController : ControllerBase
     {
         private readonly ILogger<UsersController> _logger;
-        private readonly IWebGalleryFileServerClient _webGalleryFileServerClient;
-        private readonly IProfilePictureManager _profilePictureManager;
+        private readonly IFileServerClient _fileServerClient;
 
         public ImagesController(
             ILogger<UsersController> logger, 
-            IWebGalleryFileServerClient webGalleryFileDownloader, 
-            IProfilePictureManager profilePictureManager)
+            IFileServerClient fileServerClient)
         {
             _logger = logger;
-            _webGalleryFileServerClient = webGalleryFileDownloader;
-            _profilePictureManager = profilePictureManager;
+            _fileServerClient = fileServerClient;
         }
 
         //[HttpGet("{id}")]
@@ -34,10 +30,10 @@ namespace API.Controllers
         //    return new FileContentResult(fileBytes, "image/jpeg");
         //}
 
-        [HttpGet("webgallery/{appPathBase64}")]
-        public async Task<IActionResult> WebGalleryPictureByAppPath(string appPathBase64)
+        [HttpGet("{uri}")]
+        public async Task<IActionResult> WebGalleryPictureByAppPath(string uri)
         {
-            var fileBytes = await _webGalleryFileServerClient.DownloadImageFromFileServer(appPathBase64);
+            var fileBytes = await _fileServerClient.DownloadImage(uri);
 
             return new FileContentResult(fileBytes, "image/jpeg");
         }
@@ -45,7 +41,7 @@ namespace API.Controllers
         [HttpGet("profiles/{username}")]
         public async Task<IActionResult> ProfilePicture(string username)
         {
-            var fileBytes = await _profilePictureManager.GetProfilePictureForUser(username);
+            var fileBytes = await _fileServerClient.DownloadUserProfilePicture(new DomainModel.Users.User { Username = username });
 
             return new FileContentResult(fileBytes, "image/jpeg");
         }

@@ -29,6 +29,8 @@ builder.Services.AddHttpClient("HttpClientWithSSLUntrusted").ConfigurePrimaryHtt
 });
 
 #region Infrastructure
+// Config options
+builder.Services.AddSingleton<IWebGalleryOptions, WebGalleryOptions>();
 // Repositories
 builder.Services.AddSingleton<IDatabaseConnection, SocializerDbConnection>((db) =>
 {
@@ -37,9 +39,8 @@ builder.Services.AddSingleton<IDatabaseConnection, SocializerDbConnection>((db) 
 builder.Services.AddScoped<IFeedEventRepository, FeedEventRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-// WebGallery
-builder.Services.AddSingleton<IWebGalleryOptions, WebGalleryOptions>();
-builder.Services.AddScoped<IWebGalleryFileServerClient, WebGalleryFileServerClient>();
+// File server
+builder.Services.AddScoped<IFileServerClient, WebGalleryFileServerClient>();
 // Generators
 builder.Services.AddScoped<IPostPictureGenerator, WebGalleryApiClient>();
 builder.Services.AddScoped<IRandomTextGenerator, RandommerClient>((rc) => CreateRandommerClient());
@@ -51,7 +52,6 @@ builder.Services.AddScoped<IProfilePicGenerator, ThisPersonDoesNotExistClient>()
 builder.Services.AddScoped<IPostManager, PostManager>();
 builder.Services.AddScoped<IRandomUserPostManager, RandomUserPostManager>();
 builder.Services.AddScoped<IUserRegistrationManager, UserRegistrationManager>();
-builder.Services.AddScoped<IProfilePictureManager, ProfilePictureManager>();
 
 var app = builder.Build();
 

@@ -1,8 +1,8 @@
 ﻿using DomainModel.FeedEvents;
 using DomainModel.Users;
-using Newtonsoft.Json;
 using DomainModel.FeedEvents.Interfaces;
 using DomainModel.Generators;
+using Newtonsoft.Json;
 
 namespace Logic
 {
@@ -15,20 +15,17 @@ namespace Logic
     {
         private readonly IUserRepository _userRepository;
         private readonly IFeedEventRepository _feedEventRepository;
-        private readonly IProfilePictureManager _profilePictureManager;
         private readonly IProfilePicGenerator _profilePicGenerator;
         private readonly IUserNameGenerator _userNameGenerator;
 
         public UserRegistrationManager(
             IUserRepository userRepository, 
-            IFeedEventRepository feedEventRepository, 
-            IProfilePictureManager profilePictureManager,
+            IFeedEventRepository feedEventRepository,
             IProfilePicGenerator profilePicGenerator,
             IUserNameGenerator userNameGenerator)
         {
             _userRepository = userRepository;
             _feedEventRepository = feedEventRepository;
-            _profilePictureManager = profilePictureManager;
             _profilePicGenerator = profilePicGenerator;
             _userNameGenerator = userNameGenerator;
         }
@@ -53,9 +50,8 @@ namespace Logic
                 Username = username,
             };
 
-            Stream profilePicture = await _profilePicGenerator.GeneratePicture();
-            string appPath = await _profilePictureManager.SaveProfilePictureForUser(username, profilePicture);
-            user.ProfilePicturePath = appPath;
+            var pfp = await _profilePicGenerator.GeneratePicture(user);
+            user.ProfilePicture = pfp;
 
             await _userRepository.Save(user);
             await RegisterNewUserEvent(user);
@@ -69,7 +65,7 @@ namespace Logic
             {
                 UserId = newUser.UserId,
                 Username = newUser.Username,
-                ProfilePicturePath = newUser.ProfilePicturePath
+                ProfilePictureUri = newUser.ProfilePicture.PictureUri
             };
 
             var feedEvent = new FeedEvent
