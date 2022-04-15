@@ -4,7 +4,7 @@ using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 
 namespace Infrastructure
 {
-    public class UserFace
+    public class UserFaceFeatures
     {
         public double? Age { get; set; }
         public string EmotionType { get; set; }
@@ -16,14 +16,12 @@ namespace Infrastructure
         public string? RecognitionQuality { get; set; }
     }
 
-    public class FaceReqClient : IFaceClassifier
+    public class AzureFaceRecognitionClient : IFaceClassifier
     {
         const string SUBSCRIPTION_KEY = "e6e74b463e6342579b26f5b555e88ecb";
         const string ENDPOINT = "https://web-gallery-facereq.cognitiveservices.azure.com/";
-        // Sample images:
-        const string IMAGE_BASE_URL = "https://csdx.blob.core.windows.net/resources/Face/Images/";
 
-        public async Task<UserFace> ClassifyUserFace(Stream faceImage)
+        public async Task<UserFaceFeatures> ClassifyUserFace(Stream faceImage)
         {
             const string RECOGNITION_MODEL4 = RecognitionModel.Recognition04;
             IFaceClient client = Authenticate(ENDPOINT, SUBSCRIPTION_KEY);
@@ -37,7 +35,7 @@ namespace Infrastructure
             return new FaceClient(new ApiKeyServiceClientCredentials(key)) { Endpoint = endpoint };
         }
 
-        async Task<UserFace?> DetectFace(IFaceClient client, Stream imageStream, string recognitionModel)
+        async Task<UserFaceFeatures?> DetectFace(IFaceClient client, Stream imageStream, string recognitionModel)
         {
             IList<DetectedFace> detectedFaces;
             detectedFaces = await client.Face.DetectWithStreamAsync(imageStream,
@@ -55,7 +53,7 @@ namespace Infrastructure
             if (detectedFaces.Count == 0)
                 return null;
 
-            var userFace = new UserFace();
+            var userFace = new UserFaceFeatures();
             var face = detectedFaces.Single();
 
             userFace.Age = face.FaceAttributes.Age;
@@ -96,7 +94,9 @@ namespace Infrastructure
         }
 
 
-
+        #region Sample Code
+        // Sample images:
+        const string IMAGE_BASE_URL = "https://csdx.blob.core.windows.net/resources/Face/Images/";
         public void Detect()
         {
             const string RECOGNITION_MODEL4 = RecognitionModel.Recognition04;
@@ -223,5 +223,7 @@ namespace Infrastructure
                 }
             }
         }
+        #endregion
+    
     }
 }

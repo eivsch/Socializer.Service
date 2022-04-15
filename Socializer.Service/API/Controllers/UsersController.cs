@@ -22,6 +22,8 @@ namespace API.Controllers
         public async Task<IActionResult> RegisterUser()
         {
             var newUser = await _userRegistrationManager.RegisterUser();
+            if (newUser == null)
+                return NoContent();
 
             return Ok(newUser);
         }

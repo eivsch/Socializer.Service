@@ -4,5 +4,6 @@
     {
         public int? Age { get; set; }
         public GenderType Gender { get; set; }
+        public string Emotion { get; set; }
     }
 }

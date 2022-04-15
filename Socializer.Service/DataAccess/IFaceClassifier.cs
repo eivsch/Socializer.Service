@@ -2,6 +2,6 @@
 {
     public interface IFaceClassifier
     {
-        Task<UserFace> ClassifyUserFace(Stream faceImage);
+        Task<UserFaceFeatures> ClassifyUserFace(Stream faceImage);
     }
 }

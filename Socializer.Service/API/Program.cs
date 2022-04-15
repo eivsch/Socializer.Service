@@ -47,12 +47,13 @@ builder.Services.AddScoped<IRandomTextGenerator, RandommerClient>((rc) => Create
 builder.Services.AddScoped<INameGenerator, NameParserClient>();
 builder.Services.AddScoped<IFaceGenerator, ThisPersonDoesNotExistClient>();
 #endregion
-builder.Services.AddScoped<IFaceClassifier, FaceReqClient>();
+builder.Services.AddScoped<IFaceClassifier, AzureFaceRecognitionClient>();
 
 // Logic
 builder.Services.AddScoped<IPostManager, PostManager>();
 builder.Services.AddScoped<IRandomUserPostManager, RandomUserPostManager>();
 builder.Services.AddScoped<IUserRegistrationManager, UserRegistrationManager>();
+builder.Services.AddScoped<IUserGenerator, UserGenerator>();
 
 var app = builder.Build();
 
