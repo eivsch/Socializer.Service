@@ -44,9 +44,10 @@ builder.Services.AddScoped<IFileServerClient, WebGalleryFileServerClient>();
 // Generators
 builder.Services.AddScoped<IPostPictureGenerator, WebGalleryApiClient>();
 builder.Services.AddScoped<IRandomTextGenerator, RandommerClient>((rc) => CreateRandommerClient());
-builder.Services.AddScoped<IUserNameGenerator, RandommerClient>((rc) => CreateRandommerClient());
-builder.Services.AddScoped<IProfilePicGenerator, ThisPersonDoesNotExistClient>();
+builder.Services.AddScoped<INameGenerator, NameParserClient>();
+builder.Services.AddScoped<IFaceGenerator, ThisPersonDoesNotExistClient>();
 #endregion
+builder.Services.AddScoped<IFaceClassifier, FaceReqClient>();
 
 // Logic
 builder.Services.AddScoped<IPostManager, PostManager>();

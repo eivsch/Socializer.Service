@@ -3,6 +3,7 @@ using DomainModel.Users;
 using DomainModel.FeedEvents.Interfaces;
 using DomainModel.Generators;
 using Newtonsoft.Json;
+using Infrastructure;
 
 namespace Logic
 {
@@ -15,32 +16,56 @@ namespace Logic
     {
         private readonly IUserRepository _userRepository;
         private readonly IFeedEventRepository _feedEventRepository;
-        private readonly IProfilePicGenerator _profilePicGenerator;
-        private readonly IUserNameGenerator _userNameGenerator;
+        private readonly IFaceGenerator _faceGenerator;
+        private readonly INameGenerator _userNameGenerator;
+        private readonly IFaceClassifier _faceClassifier;
+        private readonly IFileServerClient _fileServerClient;
 
         public UserRegistrationManager(
             IUserRepository userRepository, 
             IFeedEventRepository feedEventRepository,
-            IProfilePicGenerator profilePicGenerator,
-            IUserNameGenerator userNameGenerator)
+            IFaceGenerator faceGenerator,
+            INameGenerator userNameGenerator,
+            IFaceClassifier faceClassifier,
+            IFileServerClient fileServerClient)
         {
             _userRepository = userRepository;
             _feedEventRepository = feedEventRepository;
-            _profilePicGenerator = profilePicGenerator;
+            _faceGenerator = faceGenerator;
             _userNameGenerator = userNameGenerator;
+            _faceClassifier = faceClassifier;
+            _fileServerClient = fileServerClient;
         }
 
         public async Task<User> RegisterUser()
         {
-            string username = await _userNameGenerator.GenerateUserName();
-            // Make sure the username is unique
+            Stream inStream;
+            Stream copyStream;
+            UserPersonalName userPersonalName;
+            string username;
+            UserFace userFaceInfo;
+
             while (true)
             {
-                var existingUser = await _userRepository.GetUserByName(username);
-                if (existingUser != null)
-                    username = await _userNameGenerator.GenerateUserName();
-                else
+                copyStream = new MemoryStream();
+                inStream = await _faceGenerator.GenerateFace();
+                await inStream.CopyToAsync(copyStream);
+                inStream.Position = 0;  // Reset position after copying
+                copyStream.Position = 0;
+
+                userFaceInfo = await _faceClassifier.ClassifyUserFace(inStream);    // This closes the inStream for some reason
+                if (userFaceInfo != null && userFaceInfo.Gender.HasValue)
+                {
+                    userPersonalName = await _userNameGenerator.GenerateName(country: "US", gender: userFaceInfo.Gender.Value);
+                    if (userPersonalName == null)
+                        throw new Exception("Unable to generate username");
+
+                    username = userPersonalName.Firstname.ToLower() + "." + userPersonalName.Lastname.ToLower();
+
                     break;
+                }
+
+                copyStream.Dispose();
             }
 
             var user = new User
@@ -48,10 +73,16 @@ namespace Logic
                 UserId = Guid.NewGuid().ToString(),
                 UserCreated = DateTime.UtcNow,
                 Username = username,
+                PersonalName = userPersonalName,
+                UserDetails = new UserDetails
+                {
+                    Age = (int?)userFaceInfo.Age,
+                    Gender = userFaceInfo.Gender.Value
+                }
             };
-
-            var pfp = await _profilePicGenerator.GeneratePicture(user);
-            user.ProfilePicture = pfp;
+            var userProfilePictureInfo = await _fileServerClient.UploadUserProfileImage(user, copyStream);
+            user.ProfilePicture = userProfilePictureInfo;
+            await copyStream.DisposeAsync();
 
             await _userRepository.Save(user);
             await RegisterNewUserEvent(user);

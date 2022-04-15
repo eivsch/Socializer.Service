@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Infrastructure.ThirdPartyServices
 {
-    public class RandommerClient : IRandomTextGenerator, IUserNameGenerator
+    public class RandommerClient : IRandomTextGenerator
     {
         string _randommerApiEndpoint;
         string _randommerApiKey;
@@ -34,6 +34,7 @@ namespace Infrastructure.ThirdPartyServices
             throw new Exception("Unable to generate text - None or bad response from randommer.io");
         }
 
+        [Obsolete]
         public async Task<string> GenerateUserName()
         {
             HttpClient client = new HttpClient();

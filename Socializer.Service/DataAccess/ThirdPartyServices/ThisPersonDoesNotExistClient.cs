@@ -4,13 +4,20 @@ using DomainModel.Users;
 
 namespace Infrastructure.ThirdPartyServices
 {
-    public class ThisPersonDoesNotExistClient : IProfilePicGenerator
+    public class ThisPersonDoesNotExistClient : IFaceGenerator
     {
         private readonly IFileServerClient _fileServerClient;
 
         public ThisPersonDoesNotExistClient(IFileServerClient fileServerClient)
         {
             _fileServerClient = fileServerClient;
+        }
+
+        public async Task<Stream> GenerateFace()
+        {
+            var imageFile = await DownloadGeneratedPicture();
+
+            return imageFile;
         }
 
         public async Task<UserProfilePicture> GeneratePicture(User user)

@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Dapper;
+﻿using Dapper;
 using DomainModel.Users;
+using Newtonsoft.Json;
 
 namespace Infrastructure.Repositories
 {
@@ -23,15 +18,25 @@ namespace Infrastructure.Repositories
             string sql = @"SELECT TOP 1 
                             CONVERT(NVARCHAR(255), UserId) AS UserId,
                             Username,
-                            UserCreated
+                            UserCreated,
+                            UserDataJson
                         FROM SocializerUser
                         ORDER BY NEWID()";
 
             using (var connection = _db.GetConnection())
             {
-                var user = await connection.QueryFirstAsync<User>(sql);
+                var userDTO = await connection.QueryFirstAsync<UserDTO>(sql);
+                var userDataDTO = JsonConvert.DeserializeObject<UserDataJsonDTO>(userDTO.UserDataJson);
 
-                return user;
+                return new User
+                {
+                    UserId = userDTO.UserId,
+                    Username = userDTO.Username,
+                    UserCreated = userDTO.UserCreated,
+                    PersonalName = userDataDTO.PersonalName,
+                    UserDetails = userDataDTO.Details,
+                    ProfilePicture = userDataDTO.ProfilePic
+                };
             }
         }
 
@@ -40,15 +45,25 @@ namespace Infrastructure.Repositories
             string sql = @"SELECT 
                             CONVERT(NVARCHAR(255), UserId) AS UserId,
                             Username,
-                            UserCreated
+                            UserCreated,
+                            UserDataJson
                         FROM SocializerUser
                         WHERE Username = @Username";
 
             using (var connection = _db.GetConnection())
             {
-                var user = await connection.QueryFirstOrDefaultAsync<User>(sql, new { Username = username });
+                var userDTO = await connection.QueryFirstOrDefaultAsync<UserDTO>(sql, new { Username = username });
+                var userDataDTO = JsonConvert.DeserializeObject<UserDataJsonDTO>(userDTO.UserDataJson);
 
-                return user;
+                return new User
+                {
+                    UserId = userDTO.UserId,
+                    Username = userDTO.Username,
+                    UserCreated = userDTO.UserCreated,
+                    PersonalName = userDataDTO.PersonalName,
+                    UserDetails = userDataDTO.Details,
+                    ProfilePicture = userDataDTO.ProfilePic
+                };
             }
         }
 
@@ -57,23 +72,49 @@ namespace Infrastructure.Repositories
             string sql = @"INSERT INTO SocializerUser(
                             UserId, 
 	                        Username, 
-	                        UserCreated)
+	                        UserCreated,
+                            UserDataJson)
                         VALUES(
                             @UserId,
                             @Username,
-                            @UserCreated)";
+                            @UserCreated,
+                            @UserDataJson)";
 
             using (var connection = _db.GetConnection())
             {
+                var userData = new UserDataJsonDTO
+                {
+                    PersonalName = user.PersonalName,
+                    Details = user.UserDetails,
+                    ProfilePic = user.ProfilePicture
+                };
+                string userDataJson = JsonConvert.SerializeObject(userData);
+
                 var affectedRows = await connection.ExecuteAsync(sql,
                     new
                     {
                         UserId = user.UserId,
                         Username = user.Username,
                         UserCreated = user.UserCreated,
+                        UserDataJson = userDataJson
                     }
                 );
             }
+        }
+
+        private class UserDTO
+        {
+            public string UserId { get; set; }
+            public string Username { get; set; }
+            public DateTime UserCreated { get; set; }
+            public string UserDataJson { get; set; }
+        }
+
+        private class UserDataJsonDTO
+        {
+            public UserPersonalName PersonalName { get; set; }
+            public UserDetails Details { get; set; }
+            public UserProfilePicture ProfilePic { get; set; }
         }
     }
 }
