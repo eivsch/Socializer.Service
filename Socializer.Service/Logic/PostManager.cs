@@ -74,7 +74,6 @@ namespace Logic
             }
 
             return posts;
-            //return posts.OrderByDescending(p => p.PostCreated).ToList();
         }
     }
 }

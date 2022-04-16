@@ -34,18 +34,20 @@ namespace Infrastructure.Repositories
         public async Task<Post?> GetPost(string postId)
         {
             string sql = @"SELECT 
-                            CONVERT(NVARCHAR(255), PostId) AS PostId,
-                            CONVERT(NVARCHAR(255), PostUserId_Fk) AS PostUserId,
-                            PostCreated,
-                            PostDataJson
-                        FROM Post
-                        WHERE PostId LIKE @PostId";
+                            CONVERT(NVARCHAR(255), p.PostId) AS PostId,
+                            CONVERT(NVARCHAR(255), p.PostUserId_Fk) AS PostUserId,
+                            p.PostCreated,
+	                        u.Username AS PostUsername,
+                            JSON_VALUE(PostDataJson, '$.Text') AS PostHeader
+                        FROM Post p
+                        JOIN SocializerUser u ON u.UserId = p.PostUserId_Fk
+                        WHERE p.PostId LIKE @PostId";
 
             using (var connection = _db.GetConnection())
             {
-                var post = await connection.QueryFirstOrDefaultAsync<Post>(sql, new { PostId = postId + "%" });
+                var postDto = await connection.QueryFirstOrDefaultAsync<Post>(sql, new { PostId = postId + "%" });
 
-                return post;
+                return postDto;
             }
         }
 
