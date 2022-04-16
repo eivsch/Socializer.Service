@@ -1,22 +1,97 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Dapper;
+﻿using Dapper;
 using DomainModel.Posts;
-using Newtonsoft.Json;
 
 namespace Infrastructure.Repositories
 {
     public class PostRepository : IPostRepository
     {
+        private class PostDTO
+        {
+            public string PostId { get; set; }
+            public string PostUserId { get; set; }
+            public DateTime PostCreated { get; set; }
+            public string PostUserName { get; set; }
+            public string PostHeader { get; set; }
+            public string PictureId { get; set; }
+            public string PictureUri { get; set; }
+
+        }
+
         private IDatabaseConnection _db;
 
         public PostRepository(IDatabaseConnection socializerDbConnection)
         {
             _db = socializerDbConnection;
+        }
+
+        public async Task<Post?> GetPost(string postId)
+        {
+            string sql = @"SELECT 
+                            CONVERT(NVARCHAR(255), p.PostId) AS PostId,
+                            CONVERT(NVARCHAR(255), p.PostUserId_Fk) AS PostUserId,
+                            p.PostCreated,
+	                        u.Username AS PostUsername,
+                            JSON_VALUE(p.PostDataJson, '$.Text') AS PostHeader,
+	                        JSON_VALUE(p.PostDataJson, '$.PictureId') AS PictureId,
+	                        JSON_VALUE(p.PostDataJson, '$.PictureUri') AS PictureUri
+                        FROM Post p
+                        JOIN SocializerUser u ON u.UserId = p.PostUserId_Fk
+                        WHERE p.PostId LIKE @PostId";
+
+            using (var connection = _db.GetConnection())
+            {
+                var postDto = await connection.QueryFirstOrDefaultAsync<PostDTO>(sql, new { PostId = postId + "%" });
+
+                return MapFromDto(postDto);
+            }
+        }
+
+        public async Task<List<Post>> GetPostsForUser(string userId)
+        {
+            string sql = @"SELECT 
+                            CONVERT(NVARCHAR(255), p.PostId) AS PostId,
+                            CONVERT(NVARCHAR(255), p.PostUserId_Fk) AS PostUserId,
+                            p.PostCreated,
+	                        u.Username AS PostUsername,
+                            JSON_VALUE(p.PostDataJson, '$.Text') AS PostHeader,
+	                        JSON_VALUE(p.PostDataJson, '$.PictureId') AS PictureId,
+	                        JSON_VALUE(p.PostDataJson, '$.PictureUri') AS PictureUri
+                        FROM Post p
+                        JOIN SocializerUser u ON u.UserId = p.PostUserId_Fk
+                        WHERE p.PostUserId_Fk = @UserId
+                        ORDER BY p.PostCreated DESC";
+
+            using (var connection = _db.GetConnection())
+            {
+                var posts = await connection.QueryAsync<PostDTO>(sql, new { UserId = userId });
+
+                return posts.Select(s => MapFromDto(s)).ToList();
+            }
+        }
+
+        public async Task<List<Post>> GetAllPosts(int size)
+        {
+            if (size > 1000)
+                size = 1000;
+
+            string sql = @"SELECT TOP (@Size)
+                            CONVERT(NVARCHAR(255), p.PostId) AS PostId,
+                            CONVERT(NVARCHAR(255), p.PostUserId_Fk) AS PostUserId,
+                            p.PostCreated,
+	                        u.Username AS PostUsername,
+                            JSON_VALUE(PostDataJson, '$.Text') AS PostHeader,
+	                        JSON_VALUE(p.PostDataJson, '$.PictureId') AS PictureId,
+	                        JSON_VALUE(p.PostDataJson, '$.PictureUri') AS PictureUri
+                        FROM Post p
+                        JOIN SocializerUser u ON u.UserId = p.PostUserId_Fk
+                        ORDER BY p.PostCreated DESC";
+
+            using (var connection = _db.GetConnection())
+            {
+                var posts = await connection.QueryAsync<PostDTO>(sql, new { Size = size });
+
+                return posts.Select(s => MapFromDto(s)).ToList();
+            }
         }
 
         public async Task<string> GetPostData(string postId)
@@ -28,26 +103,6 @@ namespace Infrastructure.Repositories
                 var post = await connection.QueryFirstAsync<Post>(sql, new { PostId = postId + "%" });
 
                 return post.PostDataJson;
-            }
-        }
-
-        public async Task<Post?> GetPost(string postId)
-        {
-            string sql = @"SELECT 
-                            CONVERT(NVARCHAR(255), p.PostId) AS PostId,
-                            CONVERT(NVARCHAR(255), p.PostUserId_Fk) AS PostUserId,
-                            p.PostCreated,
-	                        u.Username AS PostUsername,
-                            JSON_VALUE(PostDataJson, '$.Text') AS PostHeader
-                        FROM Post p
-                        JOIN SocializerUser u ON u.UserId = p.PostUserId_Fk
-                        WHERE p.PostId LIKE @PostId";
-
-            using (var connection = _db.GetConnection())
-            {
-                var postDto = await connection.QueryFirstOrDefaultAsync<Post>(sql, new { PostId = postId + "%" });
-
-                return postDto;
             }
         }
 
@@ -78,50 +133,21 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public async Task<List<Post>> GetPostsForUser(string userId)
+        private Post MapFromDto(PostDTO dto)
         {
-            string sql = @"SELECT 
-                            CONVERT(NVARCHAR(255), p.PostId) AS PostId,
-                            CONVERT(NVARCHAR(255), p.PostUserId_Fk) AS PostUserId,
-                            p.PostCreated,
-                            p.PostDataJson,
-	                        u.Username AS PostUsername,
-                            JSON_VALUE(PostDataJson, '$.Text') AS PostHeader
-                        FROM Post p
-                        JOIN SocializerUser u ON u.UserId = p.PostUserId_Fk
-                        WHERE p.PostUserId_Fk = @UserId
-                        ORDER BY p.PostCreated DESC";
-
-            using (var connection = _db.GetConnection())
+            return new Post
             {
-                var posts = await connection.QueryAsync<Post>(sql, new { UserId = userId });
-
-                return posts.ToList();
-            }
-        }
-
-        public async Task<List<Post>> GetAllPosts(int size)
-        {
-            if (size > 1000)
-                size = 1000;
-
-            string sql = @"SELECT TOP (@Size)
-                            CONVERT(NVARCHAR(255), p.PostId) AS PostId,
-                            CONVERT(NVARCHAR(255), p.PostUserId_Fk) AS PostUserId,
-                            p.PostCreated,
-                            p.PostDataJson,
-	                        u.Username AS PostUsername,
-                            JSON_VALUE(PostDataJson, '$.Text') AS PostHeader
-                        FROM Post p
-                        JOIN SocializerUser u ON u.UserId = p.PostUserId_Fk
-                        ORDER BY p.PostCreated DESC";
-
-            using (var connection = _db.GetConnection())
-            {
-                var posts = await connection.QueryAsync<Post>(sql, new { Size = size });
-
-                return posts.ToList();
-            }
+                PostId = dto.PostId,
+                PostUserId = dto.PostUserId,
+                PostCreated = dto.PostCreated,
+                PostUsername = dto.PostUserName,
+                PostHeader = dto.PostHeader,
+                PostPicture = new PostPicture
+                {
+                    PictureId = dto.PictureId,
+                    PictureUri = dto.PictureUri,
+                },
+            };
         }
     }
 }

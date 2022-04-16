@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DomainModel.Posts;
+﻿using DomainModel.Posts;
 using DomainModel.Users;
 using Newtonsoft.Json;
 
@@ -35,14 +30,6 @@ namespace Logic
             return post;
         }
 
-        public async Task<PostPicture> GetPictureForPost(string postId)
-        {
-            var postDataJson = await _postRepository.GetPostData(postId);
-            PostPicture pic = JsonConvert.DeserializeObject<PostPicture>(postDataJson);
-
-            return pic;
-        }
-
         public async Task<List<Post>?> GetPosts(string username)
         {
             var user = await _userRepository.GetUserByName(username);
@@ -50,12 +37,6 @@ namespace Logic
                 return null;
 
             var posts = await _postRepository.GetPostsForUser(user.UserId);
-            foreach (var post in posts)
-            {
-                PostPicture pic = JsonConvert.DeserializeObject<PostPicture>(post.PostDataJson);
-                post.PostPicture = pic;
-                post.PostDataJson = null; // don't return the raw data
-            }
 
             return posts;
         }
@@ -66,14 +47,16 @@ namespace Logic
                 size = 24;
 
             var posts = await _postRepository.GetAllPosts(size);
-            foreach (var post in posts)
-            {
-                PostPicture pic = JsonConvert.DeserializeObject<PostPicture>(post.PostDataJson);
-                post.PostPicture = pic;
-                post.PostDataJson = null; // don't return the raw data
-            }
 
             return posts;
+        }
+
+        public async Task<PostPicture> GetPictureForPost(string postId)
+        {
+            var postDataJson = await _postRepository.GetPostData(postId);
+            PostPicture pic = JsonConvert.DeserializeObject<PostPicture>(postDataJson);
+
+            return pic;
         }
     }
 }
