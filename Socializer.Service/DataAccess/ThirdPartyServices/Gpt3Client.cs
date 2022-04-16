@@ -41,12 +41,18 @@ namespace Infrastructure.ThirdPartyServices
                 new StringContent(jsonString, Encoding.UTF8, "application/json")
             );
 
-            string result = await response.Content.ReadAsStringAsync();
-            if (result != null)
+            string responseContent = await response.Content.ReadAsStringAsync();
+            if (responseContent != null)
             {
-                var gptResponse = JsonConvert.DeserializeObject<GptResponseDTO>(result);
-                
-                return gptResponse?.Choices?.FirstOrDefault()?.Text ?? null;
+                var gptResponse = JsonConvert.DeserializeObject<GptResponseDTO>(responseContent);
+
+                string? generatedText = gptResponse?.Choices?.FirstOrDefault()?.Text ?? null;
+                if (!string.IsNullOrWhiteSpace(generatedText))
+                {
+                    generatedText = generatedText.TrimStart(Environment.NewLine.ToCharArray()).Trim();
+
+                    return generatedText;
+                }
             }
 
             return null;
