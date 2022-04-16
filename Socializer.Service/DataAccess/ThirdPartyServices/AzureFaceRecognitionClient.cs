@@ -2,7 +2,7 @@
 using Microsoft.Azure.CognitiveServices.Vision.Face;
 using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
 
-namespace Infrastructure
+namespace Infrastructure.ThirdPartyServices
 {
     public class UserFaceFeatures
     {
@@ -18,8 +18,14 @@ namespace Infrastructure
 
     public class AzureFaceRecognitionClient : IFaceClassifier
     {
-        const string SUBSCRIPTION_KEY = "e6e74b463e6342579b26f5b555e88ecb";
-        const string ENDPOINT = "https://web-gallery-facereq.cognitiveservices.azure.com/";
+        private readonly string ENDPOINT;
+        private readonly string SUBSCRIPTION_KEY;
+
+        public AzureFaceRecognitionClient(string endpoint, string apiKey)
+        {
+            ENDPOINT = endpoint;
+            SUBSCRIPTION_KEY = apiKey;
+        }
 
         public async Task<UserFaceFeatures> ClassifyUserFace(Stream faceImage)
         {

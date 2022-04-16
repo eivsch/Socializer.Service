@@ -21,9 +21,11 @@ namespace API.Controllers
         [HttpPost]
         public async Task<IActionResult> AddRandomPost()
         {
-            await _randomUserPostManager.PostRandomTextFromRandomUser();
+            var post = await _randomUserPostManager.PostRandomTextFromRandomUser();
+            if (post == null)
+                return NoContent();
 
-            return Ok();
+            return Ok(post);
         }
 
         [HttpGet("{postId}")]

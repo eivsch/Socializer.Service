@@ -2,6 +2,6 @@
 {
     public interface IRandomTextGenerator
     {
-        Task<string> GenerateRandomText();
+        Task<string?> GenerateRandomText();
     }
 }

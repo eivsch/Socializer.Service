@@ -1,4 +1,6 @@
-﻿namespace Infrastructure
+﻿using Infrastructure.ThirdPartyServices;
+
+namespace Infrastructure
 {
     public interface IFaceClassifier
     {

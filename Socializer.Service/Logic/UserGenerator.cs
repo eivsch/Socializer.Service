@@ -1,6 +1,7 @@
 ﻿using DomainModel.Generators;
 using DomainModel.Users;
 using Infrastructure;
+using Infrastructure.ThirdPartyServices;
 
 namespace Logic
 {

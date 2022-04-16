@@ -9,7 +9,7 @@ namespace Logic
 {
     public interface IRandomUserPostManager
     {
-        Task PostRandomTextFromRandomUser();
+        Task<Post?> PostRandomTextFromRandomUser();
     }
 
     public class RandomUserPostManager : IRandomUserPostManager
@@ -34,29 +34,36 @@ namespace Logic
             _randomTextGenerator = randomTextGenerator;
         }
 
-        public async Task PostRandomTextFromRandomUser()
+        public async Task<Post?> PostRandomTextFromRandomUser()
         {
             var user = await _userRepository.GetRandomUser();
             var picture = await _postPictureGenerator.GeneratePostPicture();
             var text = await _randomTextGenerator.GenerateRandomText();
 
-            var postData = new
+            if (user != null && picture != null && !string.IsNullOrWhiteSpace(text))
             {
-                Username = user.Username,
-                Text = text,
-                PictureId = picture.PictureId,
-                PictureUri = picture.PictureUri
-            };
-            var post = new Post
-            {
-                PostId = Guid.NewGuid().ToString(),
-                PostUserId = user.UserId,
-                PostCreated = DateTime.UtcNow,
-                PostDataJson = JsonConvert.SerializeObject(postData),
-            };
+                var postData = new
+                {
+                    Username = user.Username,
+                    Text = text,
+                    PictureId = picture.PictureId,
+                    PictureUri = picture.PictureUri
+                };
+                var post = new Post
+                {
+                    PostId = Guid.NewGuid().ToString(),
+                    PostUserId = user.UserId,
+                    PostCreated = DateTime.UtcNow,
+                    PostDataJson = JsonConvert.SerializeObject(postData),
+                };
 
-            await _postRepository.SavePost(post);
-            await RegisterNewPostEvent(post);
+                await _postRepository.SavePost(post);
+                await RegisterNewPostEvent(post);
+
+                return post;
+            }
+
+            return null;
         }
 
         private async Task RegisterNewPostEvent(Post post)

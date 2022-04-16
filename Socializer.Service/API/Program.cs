@@ -43,11 +43,17 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IFileServerClient, WebGalleryFileServerClient>();
 // Generators
 builder.Services.AddScoped<IPostPictureGenerator, WebGalleryApiClient>();
-builder.Services.AddScoped<IRandomTextGenerator, RandommerClient>((rc) => CreateRandommerClient());
+builder.Services.AddScoped<IRandomTextGenerator, Gpt3Client>((gp) => new Gpt3Client(builder.Configuration.GetValue<string>("Gpt3:ApiKey")));
 builder.Services.AddScoped<INameGenerator, NameParserClient>();
 builder.Services.AddScoped<IFaceGenerator, ThisPersonDoesNotExistClient>();
+
+builder.Services.AddScoped<IFaceClassifier, AzureFaceRecognitionClient>((cl) =>
+{
+    return new AzureFaceRecognitionClient(
+        endpoint: builder.Configuration.GetValue<string>("AzureFaceRecognition:ApiEndpoint"),
+        apiKey: builder.Configuration.GetValue<string>("AzureFaceRecognition:ApiKey"));
+});
 #endregion
-builder.Services.AddScoped<IFaceClassifier, AzureFaceRecognitionClient>();
 
 // Logic
 builder.Services.AddScoped<IPostManager, PostManager>();
@@ -77,12 +83,3 @@ app.UseCors(policy =>
     .AllowAnyHeader());
 
 app.Run();
-
-
-RandommerClient CreateRandommerClient()
-{
-    return new RandommerClient(
-        randommerApiEndpoint: builder.Configuration.GetValue<string>("Randommer:ApiEndpoint"),
-        randommerApiKey: builder.Configuration.GetValue<string>("Randommer:ApiKey")
-    );
-}

@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 
 namespace Infrastructure.ThirdPartyServices
 {
+    [Obsolete("Using Gpt3 and NameParser instead")]
     public class RandommerClient : IRandomTextGenerator
     {
         string _randommerApiEndpoint;
@@ -34,7 +35,6 @@ namespace Infrastructure.ThirdPartyServices
             throw new Exception("Unable to generate text - None or bad response from randommer.io");
         }
 
-        [Obsolete]
         public async Task<string> GenerateUserName()
         {
             HttpClient client = new HttpClient();
