@@ -41,7 +41,7 @@ namespace API.Controllers
         [HttpGet("profiles/{username}")]
         public async Task<IActionResult> ProfilePicture(string username)
         {
-            var fileBytes = await _fileServerClient.DownloadUserProfilePicture(new DomainModel.Users.User { Username = username });
+            var fileBytes = await _fileServerClient.DownloadUserProfilePicture(new DomainModel.Users.User("", username));
 
             return new FileContentResult(fileBytes, "image/jpeg");
         }

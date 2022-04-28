@@ -1,4 +1,5 @@
 using API.Configuration;
+using DomainModel.Credentials;
 using DomainModel.FeedEvents.Interfaces;
 using DomainModel.Generators;
 using DomainModel.Posts;
@@ -39,6 +40,7 @@ builder.Services.AddSingleton<IDatabaseConnection, SocializerDbConnection>((db) 
 builder.Services.AddScoped<IFeedEventRepository, FeedEventRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ICredentialsRepository, CredentialsRepository>();
 // File server
 builder.Services.AddScoped<IFileServerClient, WebGalleryFileServerClient>();
 // Generators
@@ -60,6 +62,7 @@ builder.Services.AddScoped<IPostManager, PostManager>();
 builder.Services.AddScoped<IRandomUserPostManager, RandomUserPostManager>();
 builder.Services.AddScoped<IUserRegistrationManager, UserRegistrationManager>();
 builder.Services.AddScoped<IUserGenerator, UserGenerator>();
+builder.Services.AddScoped<ICredentialsManager, CredentialsManager>();
 
 var app = builder.Build();
 

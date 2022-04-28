@@ -46,10 +46,8 @@ namespace Infrastructure.Repositories
             {
                 var userDTO = await connection.QueryFirstAsync<UserDTO>(sql);
 
-                return new User
+                return new User(userDTO.UserId, userDTO.Username)
                 {
-                    UserId = userDTO.UserId,
-                    Username = userDTO.Username,
                     UserCreated = userDTO.UserCreated,
                     PersonalName = new UserPersonalName
                     {
@@ -90,10 +88,8 @@ namespace Infrastructure.Repositories
             {
                 var userDTO = await connection.QueryFirstOrDefaultAsync<UserDTO>(sql, new { Username = username });
 
-                return new User
+                return new User(userDTO.UserId, userDTO.Username)
                 {
-                    UserId = userDTO.UserId,
-                    Username = userDTO.Username,
                     UserCreated = userDTO.UserCreated,
                     PersonalName = new UserPersonalName
                     {
@@ -129,13 +125,17 @@ namespace Infrastructure.Repositories
 
             using (var connection = _db.GetConnection())
             {
-                var userData = new
+                string? userDataJson = null;
+                if (user.HasData)
                 {
-                    PersonalName = user.PersonalName,
-                    Details = user.UserDetails,
-                    ProfilePic = user.ProfilePicture
-                };
-                string userDataJson = JsonConvert.SerializeObject(userData);
+                    var userData = new
+                    {
+                        PersonalName = user.PersonalName,
+                        Details = user.UserDetails,
+                        ProfilePic = user.ProfilePicture
+                    };
+                    userDataJson = JsonConvert.SerializeObject(userData);
+                }
 
                 var affectedRows = await connection.ExecuteAsync(sql,
                     new

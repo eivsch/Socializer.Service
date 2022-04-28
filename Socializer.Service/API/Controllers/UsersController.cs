@@ -1,4 +1,5 @@
 ﻿using Logic;
+using Logic.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -19,13 +20,23 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> RegisterUser()
+        public async Task<IActionResult> RegisterUser(RegisterUserRequest request)
         {
-            var newUser = await _userRegistrationManager.RegisterUser();
+            var newUser = await _userRegistrationManager.RegisterUser(request);
+            if (newUser == null)
+                throw new Exception("User was not correctly registered");
+
+            return Created("users", newUser);
+        }
+
+        [HttpPost("random")]
+        public async Task<IActionResult> RegisterRandomizedUser()
+        {
+            var newUser = await _userRegistrationManager.GenerateRandomUserAndRegister();
             if (newUser == null)
                 return NoContent();
 
-            return Ok(newUser);
+            return Created("users/random", newUser);
         }
 
         [HttpGet("{username}/posts")]

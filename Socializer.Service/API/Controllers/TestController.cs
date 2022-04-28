@@ -10,8 +10,6 @@ namespace API.Controllers
     [Route("[controller]")]
     public class TestController : ControllerBase
     {
-        const string ApiKey = "e5ea205e054a5ca620415395f527ec21";
-
         public TestController()
         {
 

@@ -68,11 +68,9 @@ namespace Logic
             if (iterations >= MaxIterations)
                 return null;
 
-            var user = new User
+            var user = new User(Guid.NewGuid().ToString(), username)
             {
-                UserId = Guid.NewGuid().ToString(),
                 UserCreated = DateTime.UtcNow,
-                Username = username,
                 PersonalName = userPersonalName,
                 UserDetails = new UserDetails
                 {
