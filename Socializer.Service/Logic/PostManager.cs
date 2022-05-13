@@ -6,7 +6,7 @@ namespace Logic
 {
     public interface IPostManager
     {
-        Task<List<Post>?> GetAll(int size);
+        Task<List<Post>?> GetAll(int size, string userToken);
         Task<List<Post>?> GetPosts(string username);
         Task<Post?> GetPost(string postId);
         Task<PostPicture> GetPictureForPost(string postId);
@@ -41,10 +41,12 @@ namespace Logic
             return posts;
         }
 
-        public async Task<List<Post>?> GetAll(int size)
+        public async Task<List<Post>?> GetAll(int size, string userToken)
         {
             if (size > 24 )
                 size = 24;
+
+            // Find user corresponding to the token and get posts for that user
 
             var posts = await _postRepository.GetAllPosts(size);
 

@@ -15,9 +15,11 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetFeed([FromQuery] int size)
+        public async Task<IActionResult> GetFeed([FromQuery] int size, [FromHeader] string authorization)
         {
-            var posts = await _postManager.GetAll(size);
+            string token = authorization.Replace("Bearer", "").Trim();
+
+            var posts = await _postManager.GetAll(size, "dsadas");
 
             return Ok(posts);
         }

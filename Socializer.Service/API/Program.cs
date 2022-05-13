@@ -18,6 +18,7 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddHttpClient("HttpClientWithSSLUntrusted").ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
 {
@@ -58,11 +59,12 @@ builder.Services.AddScoped<IFaceClassifier, AzureFaceRecognitionClient>((cl) =>
 #endregion
 
 // Logic
-builder.Services.AddScoped<IPostManager, PostManager>();
-builder.Services.AddScoped<IRandomUserPostManager, RandomUserPostManager>();
-builder.Services.AddScoped<IUserRegistrationManager, UserRegistrationManager>();
-builder.Services.AddScoped<IUserGenerator, UserGenerator>();
-builder.Services.AddScoped<ICredentialsManager, CredentialsManager>();
+builder.Services.AddTransient<IPostManager, PostManager>();
+builder.Services.AddTransient<IRandomUserPostManager, RandomUserPostManager>();
+builder.Services.AddTransient<IUserRegistrationManager, UserRegistrationManager>();
+builder.Services.AddTransient<IUserGenerator, UserGenerator>();
+builder.Services.AddTransient<ICredentialsManager, CredentialsManager>();
+builder.Services.AddTransient<IUserManager, UserManager>();
 
 var app = builder.Build();
 

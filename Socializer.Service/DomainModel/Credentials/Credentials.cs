@@ -8,6 +8,11 @@
             Password = password;
         }
 
+        public Credentials(string token)
+        {
+            Token = token;
+        }
+
         public int CredentialsId { get; set; }
         public string? CredentialsUserId { get; set; }
         public string Username { get; }

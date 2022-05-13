@@ -148,5 +148,26 @@ namespace Infrastructure.Repositories
                 );
             }
         }
+
+        public async Task AddUserToFollow(string userIdStart, string userToFollowIdStart)
+        {
+            if (userIdStart.Length < 5)
+                throw new ArgumentException("Need minimum the first 5 characters of the user id");
+            if (userToFollowIdStart.Length < 5)
+                throw new ArgumentException("Need minimum the first 5 characters of the user id to follow");
+
+            string sql = @"EXEC p_insert_user_relationship @UserLocator, @UserToFollowLocator";
+
+            using (var connection = _db.GetConnection())
+            {
+                var affectedRows = await connection.ExecuteAsync(sql,
+                    new
+                    {
+                        UserLocator = userIdStart,
+                        UserToFollowLocator = userToFollowIdStart
+                    }
+                );
+            }
+        }
     }
 }

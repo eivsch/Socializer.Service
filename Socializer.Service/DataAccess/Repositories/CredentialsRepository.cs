@@ -10,6 +10,7 @@ namespace Infrastructure.Repositories
         {
             public int CredentialsId { get; set; }
             public string UserId_Fk { get; set; }
+            public string Username { get; set; }
             public string Password { get; set; }
             public string Token { get; set; }
             public DateTime Created { get; set; }
@@ -109,6 +110,21 @@ namespace Infrastructure.Repositories
                 Created = timestamp,
                 Token = token
             };
+        }
+
+        public async Task<string> GetUserIdByToken(string token)
+        {
+            string sql = @"SELECT
+                            CONVERT(NVARCHAR(255), UserId_Fk) AS UserId_Fk
+                        FROM UserCredentials
+                        WHERE Token = @Token";
+
+            using (var connection = _db.GetConnection())
+            {
+                string userId = await connection.QueryFirstOrDefaultAsync<string>(sql, new { Token = token });
+
+                return userId;
+            }
         }
 
         private string GenerateToken()
