@@ -7,7 +7,7 @@ using DomainModel.Credentials;
 using DomainModel.Users;
 using Logic.Models;
 
-namespace Logic
+namespace Logic.Managers
 {
     public interface IUserManager
     {

@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using DomainModel.Credentials;
 using Logic.Models;
 
-namespace Logic
+namespace Logic.Managers
 {
     public interface IUserRegistrationManager
     {
@@ -22,7 +22,7 @@ namespace Logic
         private readonly ICredentialsRepository _credentialsRepository;
 
         public UserRegistrationManager(
-            IUserRepository userRepository, 
+            IUserRepository userRepository,
             IFeedEventRepository feedEventRepository,
             IUserGenerator userGenerator,
             ICredentialsRepository credentialsRepository)
@@ -57,10 +57,10 @@ namespace Logic
                 return null;
 
             await _userRepository.Save(user);
-            
+
             var credentials = GenerateUserCredentials();
             await _credentialsRepository.SaveCredentials(credentials);
-            
+
             await RegisterNewUserEvent(user);
 
             return user;
@@ -79,8 +79,8 @@ namespace Logic
         {
             var userData = new
             {
-                UserId = newUser.UserId,
-                Username = newUser.Username,
+                newUser.UserId,
+                newUser.Username,
             };
 
             var feedEvent = new FeedEvent

@@ -9,6 +9,7 @@ using Infrastructure.Repositories;
 using Infrastructure.ThirdPartyServices;
 using Infrastructure.WebGallery;
 using Logic;
+using Logic.Managers;
 
 var builder = WebApplication.CreateBuilder(args);
 

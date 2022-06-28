@@ -1,7 +1,7 @@
 ﻿using DomainModel.Credentials;
 using Logic.Models;
 
-namespace Logic
+namespace Logic.Managers
 {
     public interface ICredentialsManager
     {

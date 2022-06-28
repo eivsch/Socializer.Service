@@ -1,4 +1,4 @@
-﻿using Logic;
+﻿using Logic.Managers;
 using Logic.Models;
 using Microsoft.AspNetCore.Mvc;
 

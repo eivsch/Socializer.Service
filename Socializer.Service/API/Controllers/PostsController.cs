@@ -1,4 +1,4 @@
-﻿using Logic;
+﻿using Logic.Managers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers

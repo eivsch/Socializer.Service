@@ -2,7 +2,7 @@
 using DomainModel.Users;
 using Newtonsoft.Json;
 
-namespace Logic
+namespace Logic.Managers
 {
     public interface IPostManager
     {
@@ -22,7 +22,7 @@ namespace Logic
             _userRepository = userRepository;
         }
 
-        public async Task<Post?>GetPost(string postId)
+        public async Task<Post?> GetPost(string postId)
         {
             var post = await _postRepository.GetPost(postId);
 

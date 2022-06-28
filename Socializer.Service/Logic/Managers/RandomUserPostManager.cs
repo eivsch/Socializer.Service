@@ -5,7 +5,7 @@ using DomainModel.Posts;
 using DomainModel.Users;
 using Newtonsoft.Json;
 
-namespace Logic
+namespace Logic.Managers
 {
     public interface IRandomUserPostManager
     {
@@ -21,8 +21,8 @@ namespace Logic
         private IRandomTextGenerator _randomTextGenerator;
 
         public RandomUserPostManager(
-            IPostRepository postRepository, 
-            IUserRepository userRepository, 
+            IPostRepository postRepository,
+            IUserRepository userRepository,
             IFeedEventRepository feedEventRepository,
             IPostPictureGenerator postPictureGenerator,
             IRandomTextGenerator randomTextGenerator)
@@ -44,10 +44,10 @@ namespace Logic
             {
                 var postData = new
                 {
-                    Username = user.Username,
+                    user.Username,
                     Text = text,
-                    PictureId = picture.PictureId,
-                    PictureUri = picture.PictureUri
+                    picture.PictureId,
+                    picture.PictureUri
                 };
                 var post = new Post
                 {
@@ -70,8 +70,8 @@ namespace Logic
         {
             var eventData = new
             {
-                PostId = post.PostId,
-                PostUserId = post.PostUserId,
+                post.PostId,
+                post.PostUserId,
             };
 
             var feedEvent = new FeedEvent
