@@ -47,7 +47,7 @@ builder.Services.AddScoped<IFileServerClient, WebGalleryFileServerClient>();
 // Generators
 builder.Services.AddScoped<IPostPictureGenerator, WebGalleryApiClient>();
 builder.Services.AddScoped<IRandomTextGenerator, Gpt3Client>((gp) => new Gpt3Client(builder.Configuration.GetValue<string>("Gpt3:ApiKey")));
-builder.Services.AddScoped<INameGenerator, NameParserClient>();
+builder.Services.AddScoped<INameGenerator, NameParserClient>((np) => new NameParserClient(builder.Configuration.GetValue("NameParser:ApiKey", "")));
 builder.Services.AddScoped<IFaceGenerator, ThisPersonDoesNotExistClient>();
 
 builder.Services.AddScoped<IFaceClassifier, AzureFaceRecognitionClient>((cl) =>

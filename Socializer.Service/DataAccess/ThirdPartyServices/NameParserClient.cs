@@ -8,14 +8,19 @@ namespace Infrastructure.ThirdPartyServices
 {
     public class NameParserClient : INameGenerator
     {
-        const string ApiKey = "e5ea205e054a5ca620415395f527ec21";
+        private readonly string _apiKey;
+
+        public NameParserClient(string apiKey)
+        {
+            _apiKey = apiKey;
+        }
 
         public async Task<UserPersonalName?> GenerateName(string country = "US", GenderType gender = GenderType.Male)
         {
             string genderParam = gender == GenderType.Male ? "m" : "f";
 
             HttpClient client = new HttpClient();
-            var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.parser.name/?api_key={ApiKey}&endpoint=generate&country_code={country}&gender={genderParam}");
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://api.parser.name/?api_key={_apiKey}&endpoint=generate&country_code={country}&gender={genderParam}");
             var respone = client.Send(request);
             if (respone.StatusCode == HttpStatusCode.OK)
             {
