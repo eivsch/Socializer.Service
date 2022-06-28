@@ -65,6 +65,7 @@ builder.Services.AddTransient<IUserRegistrationManager, UserRegistrationManager>
 builder.Services.AddTransient<IUserGenerator, UserGenerator>();
 builder.Services.AddTransient<ICredentialsManager, CredentialsManager>();
 builder.Services.AddTransient<IUserManager, UserManager>();
+builder.Services.AddTransient<IFeedService, FeedService>();
 
 var app = builder.Build();
 

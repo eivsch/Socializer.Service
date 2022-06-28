@@ -94,6 +94,32 @@ namespace Infrastructure.Repositories
             }
         }
 
+        public async Task<List<Post>> GetFeed(int size, string feedUserId)
+        {
+            if (size > 1000)
+                size = 1000;
+
+            string sql = @"SELECT TOP (@Size)
+	                        FeedUserId,
+	                        CONVERT(NVARCHAR(255), PostId) AS PostId,
+	                        CONVERT(NVARCHAR(255), PostUserId_Fk) AS PostUserId,
+	                        PostCreated,
+	                        Username AS PostUsername,
+	                        PostHeader,
+	                        PictureId,
+	                        PictureUri
+                        FROM v_user_feed
+                        WHERE FeedUserId = @FeedUserId
+                        ORDER BY PostCreated DESC";
+
+            using (var connection = _db.GetConnection())
+            {
+                var posts = await connection.QueryAsync<PostDTO>(sql, new { Size = size, FeedUserId = feedUserId });
+
+                return posts.Select(s => MapFromDto(s)).ToList();
+            }
+        }
+
         public async Task<string> GetPostData(string postId)
         {
             string sql = @"SELECT PostDataJson FROM Post WHERE PostId LIKE @PostId";

@@ -68,7 +68,10 @@ namespace Logic
             // TODO: Maybe create a separate generator for this?
             Credentials GenerateUserCredentials()
             {
-                return new Credentials(user.UserId, "cowperson123");
+                var cre = new Credentials(user.Username, "cowperson123");
+                cre.CredentialsUserId = user.UserId;
+
+                return cre;
             }
         }
 

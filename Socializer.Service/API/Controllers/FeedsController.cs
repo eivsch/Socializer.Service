@@ -7,19 +7,17 @@ namespace API.Controllers
     [Route("[controller]")]
     public class FeedsController : ControllerBase
     {
-        IPostManager _postManager;
+        IFeedService _feedService;
 
-        public FeedsController(IPostManager postManager)
+        public FeedsController(IFeedService feedService)
         {
-            _postManager = postManager;
+            _feedService = feedService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetFeed([FromQuery] int size, [FromHeader] string authorization)
+        public async Task<IActionResult> GetFeed([FromQuery] int size, [FromHeader] string socializerToken)
         {
-            string token = authorization.Replace("Bearer", "").Trim();
-
-            var posts = await _postManager.GetAll(size, "dsadas");
+            var posts = await _feedService.GetFeed(size, socializerToken);
 
             return Ok(posts);
         }
