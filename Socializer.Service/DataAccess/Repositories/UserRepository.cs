@@ -149,28 +149,28 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public async Task AddUserToFollow(string userIdStart, string userToFollowIdStart)
+        public async Task AddUserToFollow(string currentUserName, string userToFollowName)
         {
-            if (userIdStart.Length < 5)
-                throw new ArgumentException("Need minimum the first 5 characters of the user id");
-            if (userToFollowIdStart.Length < 5)
-                throw new ArgumentException("Need minimum the first 5 characters of the user id to follow");
+            if (string.IsNullOrWhiteSpace(currentUserName))
+                throw new ArgumentNullException(nameof(currentUserName));
+            if (string.IsNullOrWhiteSpace(userToFollowName))
+                throw new ArgumentNullException(nameof(userToFollowName));
 
-            string sql = @"EXEC p_insert_user_relationship @UserLocator, @UserToFollowLocator";
+            string sql = @"EXEC p_insert_user_relationship @CurrentUserName, @UserToFollowName";
 
             using (var connection = _db.GetConnection())
             {
                 var affectedRows = await connection.ExecuteAsync(sql,
                     new
                     {
-                        UserLocator = userIdStart,
-                        UserToFollowLocator = userToFollowIdStart
+                        CurrentUserName = currentUserName,
+                        UserToFollowName = userToFollowName
                     }
                 );
             }
         }
 
-        public async Task<UserRelationship> GetUserRelationship(string currentUserToken, string relUsername)
+        public async Task<UserRelationship> GetUserRelationship(string currentUserName, string relUsername)
         {
             string sql = @"SELECT
 	                        CurrentUserName,
@@ -179,11 +179,11 @@ namespace Infrastructure.Repositories
 	                        CONVERT(NVARCHAR(255), RelatedUserId) AS RelatedUserId,
 	                        CurrentUserFollowsRelatedUser,
 	                        RelatedUserFollowsCurrentUser
-                        FROM f_tbl_get_user_relation(@CurrentUserToken, @RelUsername)";
+                        FROM f_tbl_get_user_relation(@CurrentUserName, @RelUsername)";
 
             using (var connection = _db.GetConnection())
             {
-                var relDTO = await connection.QueryFirstOrDefaultAsync<UserRelationship>(sql, new { CurrentUserToken = currentUserToken, RelUsername = relUsername });
+                var relDTO = await connection.QueryFirstOrDefaultAsync<UserRelationship>(sql, new { CurrentUserName = currentUserName, RelUsername = relUsername });
 
                 return relDTO;
             }

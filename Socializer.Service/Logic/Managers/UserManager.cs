@@ -12,7 +12,7 @@ namespace Logic.Managers
     public interface IUserManager
     {
         Task FollowUser(AddFollowerRequest addFollowerRequest);
-        Task<UserRelationInfo> GetUserRelationInfo(string currentUserToken, string relUsername);
+        Task<UserRelationInfo> GetUserRelationInfo(string currentUserName, string relUsername);
     }
 
     public class UserManager : IUserManager
@@ -28,20 +28,18 @@ namespace Logic.Managers
 
         public async Task FollowUser(AddFollowerRequest addFollowerRequest)
         {
-            string userId = await _credentialsRepository.GetUserIdByToken(addFollowerRequest.CurrentUserToken);
-            if (!string.IsNullOrWhiteSpace(userId))
-                await _userRepository.AddUserToFollow(userId, addFollowerRequest.UserToFollowId);
+            await _userRepository.AddUserToFollow(addFollowerRequest.CurrentUserName, addFollowerRequest.UserToFollowName);
         }
 
-        public async Task<UserRelationInfo> GetUserRelationInfo(string currentUserToken, string relUsername)
+        public async Task<UserRelationInfo> GetUserRelationInfo(string currentUserName, string relUsername)
         {
             UserRelationInfo result = new UserRelationInfo
             {
-                CurrentUserToken = currentUserToken,
+                CurrentUserToken = currentUserName,
                 RelatedUserName = relUsername,
             };
 
-            var relationship = await _userRepository.GetUserRelationship(currentUserToken, relUsername);
+            var relationship = await _userRepository.GetUserRelationship(currentUserName, relUsername);
             result.RelatedUserFollowsCurrentUser = relationship.RelatedUserFollowsCurrentUser;
             result.CurrentUserFollowsRelatedUser = relationship.CurrentUserFollowsRelatedUser;
 

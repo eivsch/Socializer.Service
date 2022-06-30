@@ -49,10 +49,10 @@ namespace API.Controllers
             return Ok(posts);
         }
 
-        [HttpGet("{currentUserToken}/relations/{relUsername}")]
-        public async Task<IActionResult> GetRelationInfoForUser(string currentUserToken, string relUsername)
+        [HttpGet("{currentUserName}/relations/{relUsername}")]
+        public async Task<IActionResult> GetRelationInfoForUser(string currentUserName, string relUsername)
         {
-            var userRelation = await _userManager.GetUserRelationInfo(currentUserToken, relUsername);
+            var userRelation = await _userManager.GetUserRelationInfo(currentUserName, relUsername);
 
             return Ok(userRelation);
         }

@@ -2,7 +2,7 @@
 {
     public class AddFollowerRequest
     {
-        public string? CurrentUserToken { get; set; }
-        public string UserToFollowId { get; set; }
+        public string CurrentUserName { get; set; }
+        public string UserToFollowName { get; set; }
     }
 }

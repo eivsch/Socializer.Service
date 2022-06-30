@@ -5,7 +5,7 @@
         Task Save(User user);
         Task<User> GetRandomUser();
         Task<User> GetUserByName(string username);
-        Task AddUserToFollow(string userId, string userToFollowId);
-        Task<UserRelationship> GetUserRelationship(string currentUserToken, string relUsername);
+        Task AddUserToFollow(string currentUserToken, string userToFollowName);
+        Task<UserRelationship> GetUserRelationship(string currentUserName, string relUsername);
     }
 }
