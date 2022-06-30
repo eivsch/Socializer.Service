@@ -12,6 +12,7 @@ namespace Logic.Managers
     public interface IUserManager
     {
         Task FollowUser(AddFollowerRequest addFollowerRequest);
+        Task<UserRelationInfo> GetUserRelationInfo(string currentUserToken, string relUsername);
     }
 
     public class UserManager : IUserManager
@@ -30,6 +31,21 @@ namespace Logic.Managers
             string userId = await _credentialsRepository.GetUserIdByToken(addFollowerRequest.CurrentUserToken);
             if (!string.IsNullOrWhiteSpace(userId))
                 await _userRepository.AddUserToFollow(userId, addFollowerRequest.UserToFollowId);
+        }
+
+        public async Task<UserRelationInfo> GetUserRelationInfo(string currentUserToken, string relUsername)
+        {
+            UserRelationInfo result = new UserRelationInfo
+            {
+                CurrentUserToken = currentUserToken,
+                RelatedUserName = relUsername,
+            };
+
+            var relationship = await _userRepository.GetUserRelationship(currentUserToken, relUsername);
+            result.RelatedUserFollowsCurrentUser = relationship.RelatedUserFollowsCurrentUser;
+            result.CurrentUserFollowsRelatedUser = relationship.CurrentUserFollowsRelatedUser;
+
+            return result;
         }
     }
 }

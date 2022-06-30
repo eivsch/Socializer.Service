@@ -169,5 +169,24 @@ namespace Infrastructure.Repositories
                 );
             }
         }
+
+        public async Task<UserRelationship> GetUserRelationship(string currentUserToken, string relUsername)
+        {
+            string sql = @"SELECT
+	                        CurrentUserName,
+	                        CONVERT(NVARCHAR(255), CurrentUserId) AS CurrentUserId,
+	                        RelatedUserName,
+	                        CONVERT(NVARCHAR(255), RelatedUserId) AS RelatedUserId,
+	                        CurrentUserFollowsRelatedUser,
+	                        RelatedUserFollowsCurrentUser
+                        FROM f_tbl_get_user_relation(@CurrentUserToken, @RelUsername)";
+
+            using (var connection = _db.GetConnection())
+            {
+                var relDTO = await connection.QueryFirstOrDefaultAsync<UserRelationship>(sql, new { CurrentUserToken = currentUserToken, RelUsername = relUsername });
+
+                return relDTO;
+            }
+        }
     }
 }

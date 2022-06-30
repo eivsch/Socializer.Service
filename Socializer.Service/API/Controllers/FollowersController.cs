@@ -16,17 +16,14 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddFollower([FromHeader] string socializerToken, [FromBody] AddFollowerRequest request)
+        public async Task<IActionResult> AddFollower([FromBody] AddFollowerRequest request)
         {
             if (request.UserToFollowId.Length < 5)
                 return BadRequest("Minimum the first 5 characters of the UserId to follow is required");
 
-            string token = socializerToken.Trim();
-            request.CurrentUserToken = token;
-
             await _userManager.FollowUser(request);
 
-            return Ok();
+            return Created("followers", request);
         }
     }
 }

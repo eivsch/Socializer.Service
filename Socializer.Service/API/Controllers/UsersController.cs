@@ -11,12 +11,14 @@ namespace API.Controllers
         private readonly ILogger<UsersController> _logger;
         private readonly IUserRegistrationManager _userRegistrationManager;
         private readonly IPostManager _postManager;
+        private readonly IUserManager _userManager;
 
-        public UsersController(ILogger<UsersController> logger, IUserRegistrationManager userRegistrationManager, IPostManager postManager)
+        public UsersController(ILogger<UsersController> logger, IUserRegistrationManager userRegistrationManager, IPostManager postManager, IUserManager userManager)
         {
             _logger = logger;
             _userRegistrationManager = userRegistrationManager;
             _postManager = postManager;
+            _userManager = userManager;
         }
 
         [HttpPost]
@@ -34,7 +36,7 @@ namespace API.Controllers
         {
             var newUser = await _userRegistrationManager.GenerateRandomUserAndRegister();
             if (newUser == null)
-                return NoContent();
+                throw new Exception("Not able to register random user");
 
             return Created("users/random", newUser);
         }
@@ -44,10 +46,15 @@ namespace API.Controllers
         {
             var posts = await _postManager.GetPosts(username);
 
-            if (posts == null)
-                return NotFound();
-
             return Ok(posts);
+        }
+
+        [HttpGet("{currentUserToken}/relations/{relUsername}")]
+        public async Task<IActionResult> GetRelationInfoForUser(string currentUserToken, string relUsername)
+        {
+            var userRelation = await _userManager.GetUserRelationInfo(currentUserToken, relUsername);
+
+            return Ok(userRelation);
         }
     }
 }

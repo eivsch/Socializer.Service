@@ -6,5 +6,6 @@
         Task<User> GetRandomUser();
         Task<User> GetUserByName(string username);
         Task AddUserToFollow(string userId, string userToFollowId);
+        Task<UserRelationship> GetUserRelationship(string currentUserToken, string relUsername);
     }
 }
