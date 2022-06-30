@@ -22,5 +22,13 @@ namespace API.Controllers
 
             return Created("followers", request);
         }
+
+        [HttpPost("unfollow")]
+        public async Task<IActionResult> Unfollow([FromBody] UnFollowRequest request)
+        {
+            await _userManager.UnFollowUser(request);
+
+            return Ok();
+        }
     }
 }

@@ -188,5 +188,26 @@ namespace Infrastructure.Repositories
                 return relDTO;
             }
         }
+
+        public async Task DeleteUserRelationship(string currentUserName, string userToUnFollowName)
+        {
+            if (string.IsNullOrWhiteSpace(currentUserName))
+                throw new ArgumentNullException(nameof(currentUserName));
+            if (string.IsNullOrWhiteSpace(userToUnFollowName))
+                throw new ArgumentNullException(nameof(userToUnFollowName));
+
+            string sql = @"EXEC p_delete_user_relationship @CurrentUserName, @UserToUnFollowName";
+
+            using (var connection = _db.GetConnection())
+            {
+                var affectedRows = await connection.ExecuteAsync(sql,
+                    new
+                    {
+                        CurrentUserName = currentUserName,
+                        UserToUnFollowName = userToUnFollowName
+                    }
+                );
+            }
+        }
     }
 }

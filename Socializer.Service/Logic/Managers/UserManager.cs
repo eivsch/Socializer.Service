@@ -12,6 +12,7 @@ namespace Logic.Managers
     public interface IUserManager
     {
         Task FollowUser(AddFollowerRequest addFollowerRequest);
+        Task UnFollowUser(UnFollowRequest unFollowRequest);
         Task<UserRelationInfo> GetUserRelationInfo(string currentUserName, string relUsername);
     }
 
@@ -44,6 +45,11 @@ namespace Logic.Managers
             result.CurrentUserFollowsRelatedUser = relationship.CurrentUserFollowsRelatedUser;
 
             return result;
+        }
+
+        public async Task UnFollowUser(UnFollowRequest unFollowRequest)
+        {
+            await _userRepository.DeleteUserRelationship(unFollowRequest.CurrentUserName, unFollowRequest.UserToUnfollowName);
         }
     }
 }
