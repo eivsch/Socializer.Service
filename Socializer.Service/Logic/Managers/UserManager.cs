@@ -29,7 +29,7 @@ namespace Logic.Managers
 
         public async Task FollowUser(AddFollowerRequest addFollowerRequest)
         {
-            await _userRepository.AddUserToFollow(addFollowerRequest.CurrentUserName, addFollowerRequest.UserToFollowName);
+            await _userRepository.AddUserRelationship(addFollowerRequest.CurrentUserName, addFollowerRequest.UserToFollowName);
         }
 
         public async Task<UserRelationInfo> GetUserRelationInfo(string currentUserName, string relUsername)

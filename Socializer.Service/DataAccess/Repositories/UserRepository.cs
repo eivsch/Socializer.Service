@@ -149,7 +149,7 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public async Task AddUserToFollow(string currentUserName, string userToFollowName)
+        public async Task AddUserRelationship(string currentUserName, string userToFollowName)
         {
             if (string.IsNullOrWhiteSpace(currentUserName))
                 throw new ArgumentNullException(nameof(currentUserName));
