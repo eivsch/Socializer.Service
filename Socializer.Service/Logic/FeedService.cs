@@ -26,20 +26,22 @@ namespace Logic
 
         public async Task<List<Post>> GetFeed(int size, string userToken)
         {
+            if (string.IsNullOrWhiteSpace(userToken))
+                throw new ArgumentNullException(nameof(userToken));
+
             if (size > 24)
                 size = 24;
             if (size < 1)
                 size = 1;
 
             List<Post> result = new List<Post>();
-            if (string.IsNullOrWhiteSpace(userToken))
+            string userId = await _credentialsRepository.GetUserIdByToken(userToken);
+            result = await _postRepository.GetFeed(size, userId);
+            if (result.Count < size)
             {
-                result = await _postRepository.GetAllPosts(size);
-            }
-            else
-            {
-                string userId = await _credentialsRepository.GetUserIdByToken(userToken);
-                result = await _postRepository.GetFeed(size, userId);
+                int additionalPostsSize = size - result.Count;
+                var additionalPosts = await _postRepository.GetAllPosts(additionalPostsSize);
+                result.AddRange(additionalPosts);
             }
 
             return result;
