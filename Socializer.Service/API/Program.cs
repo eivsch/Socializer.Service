@@ -4,18 +4,24 @@ using DomainModel.FeedEvents.Interfaces;
 using DomainModel.Generators;
 using DomainModel.Posts;
 using DomainModel.Users;
+using HealthChecks.UI.Client;
 using Infrastructure;
 using Infrastructure.Repositories;
 using Infrastructure.ThirdPartyServices;
 using Infrastructure.WebGallery;
 using Logic;
 using Logic.Managers;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+builder.Services.AddHealthChecks()
+    .AddSqlServer(connectionString: builder.Configuration.GetConnectionString("SocializerDb"), name: "SocializerDb");
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -79,9 +85,17 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
 app.UseAuthorization();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapHealthChecks("/health", new HealthCheckOptions()
+    {
+        ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+    });
+});
 
-app.MapControllers();
 
 // TODO: Fine grain
 app.UseCors(policy =>

@@ -3,4 +3,5 @@
 1. SocializerUser.sql
 2. Post.sql
 3. UserCredentials.sql
-4. All others
+4. All other tables
+5. All functions, views, sprocs
